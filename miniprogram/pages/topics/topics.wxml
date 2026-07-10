@@ -1,0 +1,109 @@
+<view class="page">
+  <view class="search-bar" bindtap="goSearch">
+    <text>🔍 搜索话题...</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading">加载中…</view>
+
+  <block wx:else>
+    <!-- 模块2 进行中 -->
+    <view class="section" wx:if="{{ongoing.length}}">
+      <view class="section-title">进行中</view>
+      <scroll-view scroll-x class="ongoing-scroll" enable-flex>
+        <view wx:for="{{ongoing}}" wx:key="id" class="ongoing-card">
+          <view class="ongoing-bg" data-id="{{item.id}}" bindtap="goTopicDetail">
+            <text class="ongoing-title">{{item.title}}</text>
+            <text class="ongoing-desc" wx:if="{{item.description}}">{{item.description}}</text>
+          </view>
+          <view class="ongoing-footer">
+            <text>📝 {{item.articleCount}}篇</text>
+            <text wx:if="{{item.daysRemaining !== null}}">⏳ 还剩{{item.daysRemaining}}天</text>
+          </view>
+          <button
+            class="join-btn"
+            size="mini"
+            data-id="{{item.id}}"
+            data-title="{{item.title}}"
+            bindtap="goWriteWithTopic"
+          >去参与 →</button>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 模块3 即将开始 -->
+    <view class="section" wx:if="{{upcoming.length}}">
+      <view class="section-title">即将开始</view>
+      <view
+        wx:for="{{upcoming}}"
+        wx:key="id"
+        wx:if="{{upcomingExpanded || index < 2}}"
+        class="upcoming-item"
+        data-id="{{item.id}}"
+        bindtap="goTopicDetail"
+      >
+        <text>{{item.title}}</text>
+        <text class="upcoming-time" wx:if="{{item.startAt}}">🕐 即将开始</text>
+      </view>
+      <view class="section-link" bindtap="toggleUpcoming">
+        {{upcomingExpanded ? '收起' : '查看全部 →'}}
+      </view>
+    </view>
+
+    <!-- 模块4 历史热门 -->
+    <view class="section">
+      <view class="section-title">历史热门</view>
+      <view class="tabs">
+        <text
+          class="tab {{historicalTab === 'today' ? 'active' : ''}}"
+          data-tab="today"
+          bindtap="onHistoricalTab"
+        >今日</text>
+        <text
+          class="tab {{historicalTab === 'month' ? 'active' : ''}}"
+          data-tab="month"
+          bindtap="onHistoricalTab"
+        >本月</text>
+        <text
+          class="tab {{historicalTab === 'year' ? 'active' : ''}}"
+          data-tab="year"
+          bindtap="onHistoricalTab"
+        >本年</text>
+      </view>
+      <view
+        wx:for="{{historical}}"
+        wx:key="id"
+        class="historical-item"
+        data-id="{{item.id}}"
+        bindtap="goTopicDetail"
+      >
+        <text class="rank">{{index < 3 ? ['🥇','🥈','🥉'][index] : index + 1}}</text>
+        <view class="historical-body">
+          <text class="historical-title">{{item.title}}</text>
+          <text class="historical-meta">参与 {{item.articleCount}}篇 · 阅读 {{item.viewCount}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 模块5 随机发现 -->
+    <view class="section">
+      <view class="section-title">随机发现</view>
+      <view class="random-grid">
+        <view
+          wx:for="{{randomTopics}}"
+          wx:key="id"
+          class="random-card"
+          data-id="{{item.id}}"
+          bindtap="goTopicDetail"
+        >
+          <view class="random-cover">
+            <text>{{item.title}}</text>
+          </view>
+          <text class="random-status">已结束</text>
+        </view>
+      </view>
+      <view class="section-link" bindtap="loadMoreRandom">加载更多</view>
+    </view>
+  </block>
+
+  <view class="fab" bindtap="goCreateTopic">＋ 发起话题</view>
+</view>

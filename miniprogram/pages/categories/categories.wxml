@@ -1,0 +1,9 @@
+<view class="page">
+  <text class="hint">分类目录预览（完整功能即将上线）</text>
+  <view wx:for="{{categories}}" wx:key="id" class="parent">
+    <text class="parent-name">{{item.name}}</text>
+    <view wx:for="{{item.children}}" wx:for-item="child" wx:key="id" class="child">
+      <text>{{child.name}}</text>
+    </view>
+  </view>
+</view>

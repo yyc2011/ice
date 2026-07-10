@@ -1,0 +1,221 @@
+<view class="page">
+  <view class="group">
+    <view class="group-title">账号安全</view>
+    <van-cell
+      title="我的账号"
+      value="{{account.accountName || '未设置'}}"
+      is-link="{{account.accountNameSet}}"
+      bind:click="openAccountDialog"
+    />
+    <van-cell
+      title="手机号绑定"
+      value="{{account.phoneMasked || '未绑定'}}"
+      is-link
+      bind:click="openPhoneDialog"
+    />
+    <van-cell title="微信号" value="{{account.wechatBound ? '已绑定（微信登录）' : '未绑定'}}" />
+    <van-cell
+      title="{{account.passwordSet ? '修改登录密码' : '设置登录密码'}}"
+      is-link
+      bind:click="openPasswordDialog"
+    />
+  </view>
+
+  <view class="group">
+    <van-button block plain bind:click="onLogout">退出登录</van-button>
+    <van-button block plain type="danger" custom-class="danger-btn" bind:click="openDeactivate">
+      注销账号
+    </van-button>
+  </view>
+
+  <!-- 绑定手机弹窗 -->
+  <van-popup
+    show="{{showPhoneDialog}}"
+    position="center"
+    round
+    closeable
+    safe-area-inset-bottom="{{ false }}"
+    custom-style="width: 86%; max-height: 80vh; background: transparent;"
+    bind:close="closePhoneDialog"
+  >
+    <view class="dialog-card">
+      <text class="dialog-title">绑定手机号</text>
+      <view class="field-group">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{phoneInput}}"
+          placeholder="请输入手机号"
+          type="number"
+          maxlength="11"
+          border="{{false}}"
+          bind:change="onPhoneInput"
+        />
+      </view>
+      <view class="code-row">
+        <view class="code-field-wrap">
+          <van-field
+            custom-class="dialog-field"
+            custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+            value="{{codeInput}}"
+            placeholder="请输入验证码"
+            type="number"
+            maxlength="6"
+            border="{{false}}"
+            bind:change="onCodeInput"
+          />
+        </view>
+        <van-button
+          size="small"
+          type="primary"
+          plain
+          disabled="{{countdown > 0}}"
+          custom-class="code-btn"
+          bind:click="sendCode"
+        >
+          {{countdown > 0 ? countdown + 's' : '获取验证码'}}
+        </van-button>
+      </view>
+      <van-button type="primary" block custom-class="dialog-submit" bind:click="submitBindPhone">
+        确认绑定
+      </van-button>
+    </view>
+  </van-popup>
+
+  <!-- 密码弹窗 -->
+  <van-popup
+    show="{{showPasswordDialog}}"
+    position="center"
+    round
+    closeable
+    safe-area-inset-bottom="{{ false }}"
+    custom-style="width: 86%; max-height: 80vh; background: transparent;"
+    bind:close="closePasswordDialog"
+  >
+    <view class="dialog-card">
+      <text class="dialog-title">{{account.passwordSet ? '修改密码' : '设置密码'}}</text>
+      <view class="field-group" wx:if="{{!account.accountNameSet}}">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{accountInput}}"
+          placeholder="设置账号（字母/数字/下划线，≤15位）"
+          maxlength="15"
+          border="{{false}}"
+          bind:change="onAccountInput"
+        />
+      </view>
+      <view class="field-group" wx:if="{{account.passwordSet}}">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{oldPassword}}"
+          placeholder="请输入原密码"
+          password
+          border="{{false}}"
+          bind:change="onOldPasswordInput"
+        />
+      </view>
+      <view class="field-group">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{newPassword}}"
+          placeholder="新密码（至少6位）"
+          password
+          border="{{false}}"
+          bind:change="onNewPasswordInput"
+        />
+      </view>
+      <view class="field-group">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{confirmPassword}}"
+          placeholder="确认新密码"
+          password
+          border="{{false}}"
+          bind:change="onConfirmPasswordInput"
+        />
+      </view>
+      <van-button type="primary" block custom-class="dialog-submit" bind:click="submitPassword">
+        确认
+      </van-button>
+    </view>
+  </van-popup>
+
+  <!-- 修改账号弹窗 -->
+  <van-popup
+    show="{{showAccountDialog}}"
+    position="center"
+    round
+    closeable
+    safe-area-inset-bottom="{{ false }}"
+    custom-style="width: 86%; max-height: 80vh; background: transparent;"
+    bind:close="closeAccountDialog"
+  >
+    <view class="dialog-card">
+      <text class="dialog-title">修改账号</text>
+      <text class="dialog-tip">当前账号：{{account.accountName}}</text>
+      <text class="dialog-tip">90 天内仅可修改 1 次</text>
+      <view class="field-group">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{accountNameInput}}"
+          placeholder="新账号（字母/数字/下划线，≤15位）"
+          maxlength="15"
+          border="{{false}}"
+          bind:change="onAccountNameInput"
+        />
+      </view>
+      <view class="field-group">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{accountPasswordInput}}"
+          placeholder="请输入登录密码验证"
+          password
+          border="{{false}}"
+          bind:change="onAccountPasswordInput"
+        />
+      </view>
+      <van-button type="primary" block custom-class="dialog-submit" bind:click="submitAccountName">
+        确认修改
+      </van-button>
+    </view>
+  </van-popup>
+
+  <!-- 注销确认 -->
+  <van-popup
+    show="{{showDeactivate}}"
+    position="center"
+    round
+    closeable
+    safe-area-inset-bottom="{{ false }}"
+    custom-style="width: 86%; max-height: 80vh; background: transparent;"
+    bind:close="closeDeactivate"
+  >
+    <view class="dialog-card deactivate">
+      <text class="dialog-title">确认注销账号</text>
+      <text class="deactivate-tip">注销后账号数据将无法恢复，包括文章、书币余额、等级等。</text>
+      <text class="deactivate-tip">请输入「确认注销」以继续：</text>
+      <view class="field-group">
+        <van-field
+          custom-class="dialog-field"
+          custom-style="--cell-line-height: 22px; --cell-vertical-padding: 12px; --cell-horizontal-padding: 12px; --cell-font-size: 15px;"
+          value="{{deactivateConfirm}}"
+          placeholder="确认注销"
+          border="{{false}}"
+          bind:change="onDeactivateInput"
+        />
+      </view>
+      <view class="deactivate-actions">
+        <van-button plain custom-class="deactivate-btn" bind:click="closeDeactivate">取消</van-button>
+        <van-button type="danger" custom-class="deactivate-btn" bind:click="submitDeactivate">
+          确认注销
+        </van-button>
+      </view>
+    </view>
+  </van-popup>
+</view>

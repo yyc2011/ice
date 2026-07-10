@@ -1,0 +1,30 @@
+<view class="page">
+  <van-cell-group>
+    <block wx:for="{{items}}" wx:key="id">
+      <van-cell
+        title="{{item.title}}"
+        label="{{item.createdAtLabel}}"
+        is-link="{{item.type !== 'system'}}"
+        data-item="{{item}}"
+        bind:click="onTapItem"
+      >
+        <view slot="value" wx:if="{{item.type === 'audit_reject' && item.refId}}" class="actions">
+          <van-button size="mini" data-article-id="{{item.refId}}" catchtap="goEdit">修改重提</van-button>
+          <van-button size="mini" plain data-type="ai" data-article-id="{{item.refId}}" catchtap="openAppeal">AI复审10</van-button>
+          <van-button size="mini" plain data-type="manual" data-article-id="{{item.refId}}" catchtap="openAppeal">人工复审30</van-button>
+        </view>
+      </van-cell>
+      <view wx:if="{{item.type === 'system' && expandedId === item.id}}" class="system-content">{{item.content}}</view>
+    </block>
+  </van-cell-group>
+
+  <view wx:if="{{items.length === 0}}" class="empty">暂无通知</view>
+
+  <van-popup show="{{showAppeal}}" round bind:close="closeAppeal">
+    <view class="appeal-panel">
+      <text class="appeal-title">{{appealType === 'ai' ? 'AI 复审（10 书币）' : '人工复审（30 书币）'}}</text>
+      <textarea placeholder="补充说明（选填）" value="{{appealText}}" bindinput="onAppealInput" />
+      <van-button block type="primary" bind:click="submitAppeal">提交</van-button>
+    </view>
+  </van-popup>
+</view>

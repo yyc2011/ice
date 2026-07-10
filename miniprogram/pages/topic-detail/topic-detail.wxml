@@ -1,0 +1,1 @@
+<view class="placeholder"><text class="title">{{title}}</text><text class="desc">话题详情页即将上线（ID: {{id}}）</text><button bindtap="goBack">返回</button></view>

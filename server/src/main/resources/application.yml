@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: ice-server
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:ice}?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  jooq:
+    sql-dialect: MYSQL
+  flyway:
+    enabled: true
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:ice}?useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci&useSSL=false&allowPublicKeyRetrieval=true
+    user: ${DB_USER:root}
+    password: ${DB_PASSWORD:password}
+    locations: classpath:db/migration
+    encoding: UTF-8
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    com.ice: DEBUG
+    org.jooq.SQL: DEBUG
+
+ice:
+  ai:
+    base-url: ${AI_BASE_URL:http://localhost:8000}
+    internal-token: ${INTERNAL_API_TOKEN:dev-internal-token}
+    timeout-ms: ${AI_TIMEOUT_MS:15000}
+  auth:
+    jwt-secret: ${JWT_SECRET:dev-jwt-secret-change-in-production-must-be-32chars-min}
+    jwt-expire-seconds: ${JWT_EXPIRE_SECONDS:604800}
+    wx-app-id: ${WX_APP_ID:}
+    wx-app-secret: ${WX_APP_SECRET:}
+    admin-seed-password: ${ADMIN_SEED_PASSWORD:admin123}
+    dev-login-enabled: ${DEV_LOGIN_ENABLED:true}
+  sms:
+    mock-enabled: ${SMS_MOCK_ENABLED:true}
+    mock-code: ${SMS_MOCK_CODE:123456}
+    secret-id: ${SMS_SECRET_ID:}
+    secret-key: ${SMS_SECRET_KEY:}
+    sign-name: ${SMS_SIGN_NAME:}
+    template-id: ${SMS_TEMPLATE_ID:}
+    code-expire-seconds: ${SMS_CODE_EXPIRE_SECONDS:300}
+    send-cooldown-seconds: ${SMS_SEND_COOLDOWN_SECONDS:60}
+    daily-limit: ${SMS_DAILY_LIMIT:10}

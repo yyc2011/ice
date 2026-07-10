@@ -1,0 +1,1 @@
+Page({ data: { title: '发起话题' }, goBack() { wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/topics/topics' }) }) } })

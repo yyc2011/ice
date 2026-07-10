@@ -1,0 +1,1 @@
+Page({ data: { title: '搜索' }, goBack() { wx.navigateBack() } })

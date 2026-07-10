@@ -1,0 +1,9 @@
+<view>
+  <button bindtap="onGet">GET</button>
+  <button bindtap="onClear">CLEAR</button>
+
+  <view wx:for="{{list}}" wx:key="id">
+    <text>{{item.id}}</text>
+    <text>{{item.title}}</text>
+  </view>
+</view>

@@ -1,0 +1,121 @@
+---
+description: 微信小程序使用 openapi-generator 生成的 typescript-fetch 客户端时的兼容性问题与解决模式，遇到相关报错时参考
+globs: miniprogram/**
+alwaysApply: false
+---
+
+# 微信小程序 + OpenAPI Generator 兼容性规范
+
+## 背景
+
+本项目使用 `openapi-generator-cli`（`typescript-fetch` 模板）生成前端 API 客户端代码。
+生成的代码基于**浏览器标准 API**编写，而微信小程序运行环境**不是浏览器**，缺少以下全局对象：
+
+| 缺失的浏览器 API | 报错特征 |
+|---|---|
+| `fetch` | `ReferenceError: fetch is not defined` |
+| `URLSearchParams` | `ReferenceError: URLSearchParams is not defined` |
+| `Response` | `ReferenceError: Response is not defined` |
+
+---
+
+## 已确立的解决模式
+
+### 1. `fetch` → `wxFetch` 适配器
+
+生成的客户端通过 `Configuration.fetchApi` 注入自定义 fetch 实现。
+在页面的 `.ts` 文件中创建 `wxFetch` 适配器，将 `wx.request` 包装成 `fetch` 接口：
+
+```typescript
+// 小程序没有 fetch 和 Response 类，用 mock 对象实现 runtime.ts 需要的最小接口
+const wxFetch = (url: string, init?: RequestInit): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    wx.request({
+      url,
+      method: (init?.method as any) || 'GET',
+      header: (init?.headers as any) || {},
+      data: init?.body as any,
+      success: (res: any) => {
+        const mockResponse = {
+          status: res.statusCode,
+          ok: res.statusCode >= 200 && res.statusCode < 300,
+          headers: { get: (key: string) => res.header?.[key] ?? null },
+          json: () => Promise.resolve(res.data),
+          text: () => Promise.resolve(JSON.stringify(res.data)),
+          clone: () => mockResponse,
+        }
+        resolve(mockResponse)
+      },
+      fail: (err: any) => reject(err),
+    })
+  })
+}
+
+const apiConfig = new Configuration({ fetchApi: wxFetch as any })
+```
+
+**注意**：
+- `mockResponse` 中的 `clone()` 返回自身引用，满足 `runtime.ts` 中间件链的调用需求
+- `json()` 直接返回 `res.data`（wx.request 已自动解析 JSON），不需要再次 parse
+
+### 2. `URLSearchParams` → `typeof` 守卫
+
+生成的 `runtime.ts` 中有 `overriddenInit.body instanceof URLSearchParams`，直接引用未定义变量会抛 `ReferenceError`。
+
+**修复位置**：`miniprogram/api/generated/runtime.ts`（由 `package.json` 的 `generate:api` 脚本自动打补丁）
+
+```typescript
+// 修复前
+|| (overriddenInit.body instanceof URLSearchParams)
+
+// 修复后
+|| (typeof URLSearchParams !== 'undefined' && overriddenInit.body instanceof URLSearchParams)
+```
+
+`typeof` 对未定义变量不抛异常，可安全短路，避免 `instanceof` 执行。
+
+**为什么不用 polyfill**：在小程序模块沙箱中，通过 `globalThis.URLSearchParams = ...` 注入的全局变量，在其他模块中通过自由变量名访问时不一定可见（词法作用域与全局对象属性查找不等价）。
+
+### 4. 模块导入路径 → 必须写具体文件
+
+微信小程序**不支持** Node 风格的目录导入（`from './generated'` 会报 `module 'api/generated.js' is not defined`）。
+
+| 错误 | 正确 |
+|---|---|
+| `from './generated'` | `from './generated/runtime'` 或 `from './generated/apis/ArticleControllerApi'` |
+| `from '../../api/generated'` | `from '../../api/generated/models/TopicItemDto'` |
+| `from './generated/models'` | `from './generated/models/TopicItemDto'` |
+
+业务代码统一通过 `api/instances.ts` 获取 API 单例；页面类型从 `api/generated/models/` 下具体文件 import。
+
+### 3. 生成文件 TypeScript 严格模式报错 → `// @ts-nocheck`
+
+生成的模型文件中存在 `value['id']`（对 `object` 类型索引）等不符合严格模式的写法，
+会产生 `ts(7053)` 等 IDE 报错，但这些是生成代码，不应手动修改。
+
+**解决方式**：`generate:api` 脚本在生成后自动在每个 `.ts` 文件首行插入 `// @ts-nocheck`。
+
+---
+
+## generate:api 脚本的完整逻辑
+
+`package.json` 中的 `generate:api` 脚本包含三步：
+
+```
+openapi-generator-cli generate ...          # 1. 生成客户端代码
+find ... | xargs sed ... '// @ts-nocheck'  # 2. 所有生成文件加 @ts-nocheck
+sed ... runtime.ts（URLSearchParams 补丁）  # 3. 修复 runtime.ts 中的 URLSearchParams
+```
+
+**每次重新生成后上述补丁自动重新应用，无需手动操作。**
+
+---
+
+## 如遇新的 "xxx is not defined" 报错
+
+按以下顺序排查：
+
+1. 确认报错位置（栈帧中的文件名）
+2. 如果在 `runtime.ts` 或生成的文件中 → 用 `typeof xxx !== 'undefined'` 守卫，并加入 `generate:api` 脚本补丁
+3. 如果在 `test-essay-list.ts` 等自己编写的文件中 → 用 mock 对象或 `wx.*` 替代实现
+4. **不要**在 `app.ts` 里用 `globalThis.xxx = polyfill` 的方式，小程序沙箱中其他模块无法通过自由变量访问到

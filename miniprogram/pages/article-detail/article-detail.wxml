@@ -1,0 +1,20 @@
+<view class="page" wx:if="{{article}}">
+  <text class="title">{{article.title}}</text>
+  <view class="meta">
+    <van-tag type="{{article.status === 'published' ? 'success' : article.status === 'rejected' ? 'danger' : 'primary'}}">
+      {{article.status === 'draft' ? '草稿' : article.status === 'reviewing' ? '审核中' : article.status === 'published' ? '已发布' : article.status === 'rejected' ? '已拒绝' : article.status}}
+    </van-tag>
+    <text wx:if="{{article.ai_quality_score !== null}}" class="score">AI {{article.ai_quality_score}} 分</text>
+  </view>
+  <view wx:if="{{article.reject_reason}}" class="reject-box">
+    <text class="reject-title">拒绝原因</text>
+    <text>{{article.reject_reason}}</text>
+  </view>
+  <view class="tags">
+    <van-tag wx:for="{{article.tags}}" wx:key="id" plain>{{item.name}}</van-tag>
+  </view>
+  <text class="content">{{article.content}}</text>
+  <view wx:if="{{article.status === 'rejected'}}" class="footer">
+    <van-button block type="primary" bind:click="goEdit">修改后重提</van-button>
+  </view>
+</view>

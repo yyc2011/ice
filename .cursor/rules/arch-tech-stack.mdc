@@ -1,0 +1,26 @@
+---
+description: 系统架构设计与技术选型，搭建项目骨架、新建模块、配置依赖时参考
+globs: 
+alwaysApply: false
+---
+
+# 系统架构与技术选型
+
+完整文档：`docs/arch-tech-stack.md`
+
+## 核心技术栈
+
+- **主后端**：Kotlin + Spring Boot 4.0.4 + JOOQ + MySQL 8.4.5 + Redis
+- **AI 后端**：Python 3.11+ + FastAPI（内网微服务，大模型审核）
+- **构建**：Gradle（Kotlin DSL）+ pip（ai/）
+- **本地环境**：Docker + Docker Compose（MySQL + Redis + AI）
+- **前端**：TypeScript + Vant Weapp（微信小程序）
+
+## 前后端接口联动（强制规范）
+
+后端 SpringDoc 生成 `openapi.json` → openapi-generator-cli 生成 TypeScript fetch 客户端 → 小程序直接引用生成代码。接口变更后必须重新生成客户端，禁止手写 fetch 调用。
+
+## 数据库设计原则
+
+- 表设计时所有核心表必须预留 `user_id` 作为分片键
+- 初期 MySQL 单库，数据量 1 亿+ 时评估分库分表或迁移 TiDB

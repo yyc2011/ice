@@ -1,0 +1,25 @@
+<view class="tab-bar">
+  <view class="tab-bar-border"></view>
+  <view
+    wx:for="{{tabs}}"
+    wx:key="index"
+    class="tab-bar-item {{item.isWrite ? 'tab-bar-write' : ''}} {{selected === item.index ? 'tab-bar-item-active' : ''}}"
+    data-index="{{item.index}}"
+    data-is-write="{{item.isWrite}}"
+    bindtap="onTabTap"
+  >
+    <block wx:if="{{item.isWrite}}">
+      <view class="write-btn">
+        <image class="write-icon" src="/assets/tab/write.png" mode="aspectFit" />
+      </view>
+    </block>
+    <block wx:else>
+      <image
+        class="tab-icon"
+        src="{{selected === item.index ? item.selectedIconPath : item.iconPath}}"
+        mode="aspectFit"
+      />
+      <text class="tab-text" style="color: {{selected === item.index ? selectedColor : color}}">{{item.text}}</text>
+    </block>
+  </view>
+</view>

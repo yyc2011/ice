@@ -1,0 +1,20 @@
+---
+description: 需求文档 v1 为当前准绳；v0 已归档；项目总入口见 09-todo
+alwaysApply: true
+---
+
+# 需求文档定位
+
+- **项目总入口（先看）**：[`docs/09-todo-项目总进度-2026-07-07.md`](docs/09-todo-项目总进度-2026-07-07.md) — 唯一 TODO 总入口；新增 11/12 等专题时只更新此文件地图与待办，不新建第二个 09
+- **当前准绳**：[`docs/10-track-需求文档-v1-2026-07-07.md`](docs/10-track-需求文档-v1-2026-07-07.md)（持续迭代；与 09 同为长期锚点）
+- **历史草稿**：[`docs/_archived-需求文档-v0-总体设计.md`](docs/_archived-需求文档-v0-总体设计.md) 仅供对照
+- **日常讨论、评审与实现**：优先以 `docs/wireframe-*.md`、`docs/09-todo`、track/review 文档及对话共识为准
+- **数据表设计**：见 [`docs/08-track-数据表设计-2026-07-07.md`](docs/08-track-数据表设计-2026-07-07.md)
+- **API 设计**：见 [`docs/11-track-API设计-2026-07-08.md`](docs/11-track-API设计-2026-07-08.md)
+- **审核模块**：见 [`docs/12-track-审核模块-2026-07-08.md`](docs/12-track-审核模块-2026-07-08.md)
+- **管理后台 / 登录 / 分类种子**：见 `13-track`、`14-track`、`15-track`
+- **技术架构**：见 [`docs/arch-tech-stack.md`](docs/arch-tech-stack.md)
+
+与 `product-design.mdc` 工作流一致：**线框图 → 需求文档 → 数据表设计**
+
+命名说明：需求文档纳入 `0X-track` 体系（10-track），版本号保留在描述中（v1）。

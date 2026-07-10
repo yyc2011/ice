@@ -1,0 +1,39 @@
+services:
+  mysql:
+    image: mysql:8.4.5
+    container_name: ice-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ice
+      MYSQL_USER: ice
+      MYSQL_PASSWORD: password
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - ice-mysql-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    container_name: ice-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ice-redis-data:/data
+
+  ai:
+    build:
+      context: ../ai
+      dockerfile: Dockerfile
+    container_name: ice-ai
+    ports:
+      - "8000:8000"
+    environment:
+      INTERNAL_API_TOKEN: dev-internal-token
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+
+volumes:
+  ice-mysql-data:
+  ice-redis-data:

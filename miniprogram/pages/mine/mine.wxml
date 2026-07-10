@@ -1,0 +1,59 @@
+<view class="page">
+  <view class="profile" wx:if="{{me}}">
+    <view class="profile-main">
+      <view class="avatar">{{me.nickname[0] || '我'}}</view>
+      <view class="info">
+        <text class="nickname">{{me.nickname}}</text>
+        <text class="meta">{{me.levelName}} · {{me.bookCoinBalance}} 书币</text>
+      </view>
+    </view>
+    <view class="profile-actions">
+      <button class="profile-btn" size="mini" bindtap="onGetUserProfile">授权头像昵称</button>
+      <view class="bell" bindtap="goNotifications">🔔</view>
+    </view>
+  </view>
+
+  <view class="stats" wx:if="{{me}}">
+    <text>文章 {{me.articleCount}}</text>
+    <text>粉丝 {{me.followerCount}}</text>
+    <text>关注 {{me.followingCount}}</text>
+  </view>
+
+  <view class="section-title">我的文章</view>
+  <scroll-view scroll-x class="tabs">
+    <view
+      wx:for="{{statusTabs}}"
+      wx:key="key"
+      class="tab {{activeStatus === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="onTabChange"
+    >{{item.label}}</view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="loading">加载中…</view>
+  <van-cell-group wx:else>
+    <van-cell
+      wx:for="{{articles}}"
+      wx:key="id"
+      title="{{item.title || '无标题'}}"
+      label="{{item.updatedAtLabel}}"
+      is-link
+      data-id="{{item.id}}"
+      bind:click="goDetail"
+    >
+      <van-tag slot="right-icon" type="{{item.status === 'published' ? 'success' : item.status === 'rejected' ? 'danger' : 'primary'}}">
+        {{item.status === 'draft' ? '草稿' : item.status === 'reviewing' ? '审核中' : item.status === 'published' ? '已发布' : item.status === 'rejected' ? '已拒绝' : item.status}}
+      </van-tag>
+    </van-cell>
+  </van-cell-group>
+
+  <view wx:if="{{!loading && articles.length === 0}}" class="empty">
+    <text>还没有文章</text>
+    <van-button size="small" type="primary" bind:click="goWrite">去写文</van-button>
+  </view>
+
+  <view class="footer-actions">
+    <van-button block plain bind:click="goSettings">设置 →</van-button>
+    <van-button block plain bind:click="onLogout">重新登录</van-button>
+  </view>
+</view>

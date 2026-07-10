@@ -1,0 +1,1 @@
+Page({ data: { title: '精选新文' }, goBack() { wx.navigateBack({ fail: () => wx.switchTab({ url: '/pages/home/home' }) }) } })

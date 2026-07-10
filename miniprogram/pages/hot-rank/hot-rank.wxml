@@ -1,0 +1,5 @@
+<view class="placeholder">
+  <text class="title">{{title}}</text>
+  <text class="desc">完整页面即将上线</text>
+  <button bindtap="goBack">返回</button>
+</view>

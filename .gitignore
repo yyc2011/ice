@@ -1,0 +1,43 @@
+# ===========================
+# 微信开发者工具
+# ===========================
+project.private.config.json
+miniprogram/.DS_Store
+
+# ===========================
+# Node
+# ===========================
+node_modules/
+
+# ===========================
+# 后端 Gradle (server/)
+# ===========================
+# 忽略构建产物，但保留已提交的 jOOQ 生成源码（clone 即可编译）
+server/build/*
+!server/build/generated-src/
+server/build/generated-src/*
+!server/build/generated-src/jooq/
+server/build/generated-src/jooq/*
+!server/build/generated-src/jooq/main/
+!server/build/generated-src/jooq/main/**
+server/.gradle/
+server/local.properties
+server/*.iml
+
+# ===========================
+# Python AI 服务 (ai/)
+# ===========================
+ai/venv/
+ai/.venv/
+ai/__pycache__/
+ai/**/__pycache__/
+ai/*.pyc
+ai/*.pyo
+ai/.env
+
+# ===========================
+# 系统文件
+# ===========================
+.DS_Store
+*.swp
+*.swo

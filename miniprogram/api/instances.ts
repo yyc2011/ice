@@ -1,0 +1,22 @@
+import { apiConfig } from './api-config'
+import { ArticleControllerApi } from './generated/apis/ArticleControllerApi'
+import { AuthControllerApi } from './generated/apis/AuthControllerApi'
+import { CategoryControllerApi } from './generated/apis/CategoryControllerApi'
+import { ConfigControllerApi } from './generated/apis/ConfigControllerApi'
+import { MeControllerApi } from './generated/apis/MeControllerApi'
+import { NotificationControllerApi } from './generated/apis/NotificationControllerApi'
+import { RankingControllerApi } from './generated/apis/RankingControllerApi'
+import { TagControllerApi } from './generated/apis/TagControllerApi'
+import { TestEssayControllerApi } from './generated/apis/TestEssayControllerApi'
+import { TopicControllerApi } from './generated/apis/TopicControllerApi'
+
+export const authApi = new AuthControllerApi(apiConfig)
+export const configApi = new ConfigControllerApi(apiConfig)
+export const meApi = new MeControllerApi(apiConfig)
+export const articleApi = new ArticleControllerApi(apiConfig)
+export const tagApi = new TagControllerApi(apiConfig)
+export const categoryApi = new CategoryControllerApi(apiConfig)
+export const topicApi = new TopicControllerApi(apiConfig)
+export const rankingApi = new RankingControllerApi(apiConfig)
+export const notificationApi = new NotificationControllerApi(apiConfig)
+export const testEssayApi = new TestEssayControllerApi(apiConfig)

@@ -1,0 +1,19 @@
+{
+  "name": "miniprogram-ts-less-quickstart",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "generate:api:miniprogram": "openapi-generator-cli generate -i openapi/openapi.json -g typescript-fetch -o miniprogram/api/generated && find miniprogram/api/generated -name '*.ts' | xargs sed -i '' '1s|^|// @ts-nocheck\\n|' && sed -i '' 's/overriddenInit\\.body instanceof URLSearchParams/typeof URLSearchParams !== \"undefined\" \\&\\& overriddenInit.body instanceof URLSearchParams/g' miniprogram/api/generated/runtime.ts",
+    "generate:api:admin": "openapi-generator-cli generate -i openapi/openapi.json -g typescript-fetch -o admin/src/api/generated && find admin/src/api/generated -name '*.ts' | xargs sed -i '' '1s|^|// @ts-nocheck\\n|'",
+    "generate:api": "npm run generate:api:miniprogram && npm run generate:api:admin"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^2.8.3-1",
+    "@openapitools/openapi-generator-cli": "^2.15.3"
+  }
+}

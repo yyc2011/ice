@@ -1,0 +1,100 @@
+<view class="page">
+  <view class="status-bar" style="height: {{statusBarHeight}}px;"></view>
+  <view class="top-bar" style="padding-right: {{navPaddingRight}}px;">
+    <view class="top-bar-left" bindtap="onBack">
+      <van-icon name="arrow-left" size="20px" />
+    </view>
+    <view class="top-bar-center">
+      <text class="top-bar-btn {{saving ? 'disabled' : ''}}" bindtap="onSaveDraft">保存草稿</text>
+      <text class="top-bar-count {{wordCount > wordLimit ? 'over-limit' : ''}}">{{wordCount}}/{{wordLimit}}</text>
+    </view>
+    <text class="top-bar-publish" bindtap="openSettings">去发布</text>
+  </view>
+
+  <view class="field">
+    <input class="title-input" placeholder="请输入标题..." value="{{title}}" bindinput="onTitleInput" maxlength="15" />
+  </view>
+  <view class="field">
+    <textarea class="content-input" placeholder="开始写作..." value="{{content}}" bindinput="onContentInput" maxlength="-1" />
+  </view>
+
+  <van-popup
+    show="{{showSettings}}"
+    position="bottom"
+    round
+    custom-style="height: 85vh;"
+    bind:close="closeSettings"
+  >
+    <view class="settings-wrap">
+      <view class="settings-header">
+        <text class="settings-header-title">发布设置</text>
+        <view class="settings-header-close" bindtap="closeSettings">
+          <van-icon name="cross" size="20px" />
+        </view>
+      </view>
+
+      <scroll-view class="settings-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <text class="settings-title">标签（必填 1-5 个）</text>
+        <view class="selected-tags">
+          <van-tag wx:for="{{selectedTags}}" wx:key="id" closeable data-id="{{item.id}}" bind:close="onRemoveTag">{{item.name}}</van-tag>
+        </view>
+        <van-search value="{{tagSearch}}" placeholder="搜索或新建标签" bind:change="onTagSearchChange" bind:search="onTagSearch" />
+        <view class="tag-results">
+          <van-cell wx:for="{{tagResults}}" wx:key="id" title="{{item.name}}" is-link data-id="{{item.id}}" data-name="{{item.name}}" bind:click="onSelectTag" />
+        </view>
+        <van-button wx:if="{{showCreateTag}}" block plain size="small" bind:click="onCreateTag">新建「{{tagSearch}}」</van-button>
+
+        <text class="settings-title">分类（选填）</text>
+        <van-cell title="选择分类" value="{{selectedCategoryLabel || '默认分类'}}" is-link bind:click="openCategoryPicker" />
+        <view wx:if="{{selectedCategoryLabel}}" class="category-selected">
+          <van-tag closeable bind:close="clearCategory">{{selectedCategoryLabel}}</van-tag>
+        </view>
+      </scroll-view>
+
+      <view class="settings-footer">
+        <van-button
+          block
+          type="primary"
+          loading="{{publishing}}"
+          disabled="{{selectedTags.length < 1}}"
+          bind:click="onPublish"
+        >发布文章</van-button>
+        <text wx:if="{{selectedTags.length < 1}}" class="publish-hint">请先设置标签</text>
+      </view>
+    </view>
+  </van-popup>
+
+  <van-popup
+    show="{{showCategoryPicker}}"
+    position="bottom"
+    round
+    custom-style="height: 60vh;"
+    bind:close="closeCategoryPicker"
+  >
+    <view class="category-picker-wrap">
+      <view class="category-picker-header">
+        <text class="category-picker-title">选择分类</text>
+        <view class="category-picker-close" bindtap="closeCategoryPicker">
+          <van-icon name="cross" size="20px" />
+        </view>
+      </view>
+      <van-tree-select
+        wx:if="{{showCategoryPicker}}"
+        items="{{categoryPickerItems}}"
+        main-active-index="{{categoryMainIndex}}"
+        active-id="{{categoryPickerActiveId}}"
+        height="{{categoryPickerHeight}}"
+        bind:click-nav="onCategoryNavClick"
+        bind:click-item="onCategoryItemClick"
+      />
+      <view class="category-picker-footer">
+        <van-button
+          block
+          type="primary"
+          disabled="{{!categoryPickerActiveId}}"
+          bind:click="onCategoryConfirm"
+        >确认</van-button>
+      </view>
+    </view>
+  </van-popup>
+</view>
