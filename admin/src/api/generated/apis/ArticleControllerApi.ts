@@ -46,6 +46,7 @@ export interface CreateDraftOperationRequest {
 }
 
 export interface FeaturedRequest {
+    page?: number;
     size?: number;
 }
 
@@ -122,6 +123,10 @@ export class ArticleControllerApi extends runtime.BaseAPI {
      */
     async featuredRequestOpts(requestParameters: FeaturedRequest): Promise<runtime.RequestOpts> {
         const queryParameters: any = {};
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
 
         if (requestParameters['size'] != null) {
             queryParameters['size'] = requestParameters['size'];

@@ -63,6 +63,21 @@ Page({
     wx.navigateTo({ url: `/pages/topic-detail/topic-detail?id=${id}` })
   },
 
+  onTopicCard(e: WechatMiniprogram.CustomEvent) {
+    const id = e.detail.id
+    if (id) {
+      wx.navigateTo({ url: `/pages/topic-detail/topic-detail?id=${id}` })
+    }
+  },
+
+  onTopicJoin(e: WechatMiniprogram.CustomEvent) {
+    const { id, title } = e.detail as { id?: number; title?: string }
+    if (!id) return
+    wx.navigateTo({
+      url: `/pages/write/write?topic_id=${id}&topic_title=${encodeURIComponent(title || '')}&from=home`,
+    })
+  },
+
   goHotRank() {
     wx.navigateTo({ url: '/pages/hot-rank/hot-rank' })
   },

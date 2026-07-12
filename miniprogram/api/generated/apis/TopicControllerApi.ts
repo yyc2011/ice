@@ -18,6 +18,7 @@ import * as runtime from '../runtime';
 import type {
   CreateTopicRequest,
   CreateTopicResponse,
+  TopicArticlesResponse,
   TopicDetailResponse,
   TopicListResponse,
 } from '../models/index';
@@ -26,11 +27,20 @@ import {
     CreateTopicRequestToJSON,
     CreateTopicResponseFromJSON,
     CreateTopicResponseToJSON,
+    TopicArticlesResponseFromJSON,
+    TopicArticlesResponseToJSON,
     TopicDetailResponseFromJSON,
     TopicDetailResponseToJSON,
     TopicListResponseFromJSON,
     TopicListResponseToJSON,
 } from '../models/index';
+
+export interface ArticlesRequest {
+    id: number;
+    sort?: string;
+    page?: number;
+    size?: number;
+}
 
 export interface CreateRequest {
     createTopicRequest: CreateTopicRequest;
@@ -55,6 +65,61 @@ export interface OngoingRequest {
  * 
  */
 export class TopicControllerApi extends runtime.BaseAPI {
+
+    /**
+     * Creates request options for articles without sending the request
+     */
+    async articlesRequestOpts(requestParameters: ArticlesRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling articles().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters['sort'] != null) {
+            queryParameters['sort'] = requestParameters['sort'];
+        }
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['size'] != null) {
+            queryParameters['size'] = requestParameters['size'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+
+        let urlPath = `/api/v1/topics/{id}/articles`;
+        urlPath = urlPath.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id'])));
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     */
+    async articlesRaw(requestParameters: ArticlesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TopicArticlesResponse>> {
+        const requestOptions = await this.articlesRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TopicArticlesResponseFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async articles(requestParameters: ArticlesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TopicArticlesResponse> {
+        const response = await this.articlesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Creates request options for create without sending the request

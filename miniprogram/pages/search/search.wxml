@@ -1,1 +1,109 @@
-<view class="placeholder"><text class="title">{{title}}</text><text class="desc">搜索结果页即将上线</text><button bindtap="goBack">返回</button></view>
+<view class="page">
+  <view class="search-bar">
+    <input
+      class="input"
+      placeholder="输入关键词搜索"
+      value="{{q}}"
+      confirm-type="search"
+      bindinput="onQInput"
+      bindconfirm="onSearchConfirm"
+    />
+    <view class="type" bindtap="toggleTypePicker">{{typeLabel}} ▾</view>
+  </view>
+
+  <view class="type-panel" wx:if="{{showTypePicker}}">
+    <view
+      wx:for="{{typeOptions}}"
+      wx:key="value"
+      class="type-option {{type === item.value ? 'on' : ''}}"
+      data-type="{{item.value}}"
+      bindtap="onSelectType"
+    >{{item.label}}</view>
+  </view>
+
+  <view class="info" wx:if="{{searched && !loading && !error}}">
+    <text>搜索：{{q}}　类型：{{typeLabel}}</text>
+    <text>共 {{total}} 条结果</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">搜索中…</view>
+
+  <view wx:elif="{{error}}" class="state">
+    <text>网络异常，请稍后重试</text>
+    <button size="mini" bindtap="retry">重试</button>
+  </view>
+
+  <block wx:elif="{{searched}}">
+    <block wx:if="{{type === 'author'}}">
+      <view wx:if="{{!users.length}}" class="state empty">
+        <text>未找到相关内容</text>
+        <text class="hint">试试更短关键词，或切换搜索类型</text>
+        <view class="empty-actions">
+          <button size="mini" bindtap="goHome">返回首页</button>
+          <button size="mini" bindtap="onSearchConfirm">重新搜索</button>
+        </view>
+      </view>
+      <view
+        wx:for="{{users}}"
+        wx:key="id"
+        class="user-card"
+        bindtap="onTapUser"
+      >
+        <image class="avatar" src="{{item.avatarUrl || '/assets/tab/mine.png'}}" mode="aspectFill" />
+        <view class="user-body">
+          <text class="name">{{item.nickname}}</text>
+          <text class="bio">{{item.bio || '暂无简介'}}</text>
+          <text class="meta">文章 {{item.articleCount || 0}} · 获赞 {{item.likeCount || 0}}</text>
+        </view>
+      </view>
+    </block>
+
+    <block wx:elif="{{type === 'topic'}}">
+      <view wx:if="{{!topics.length}}" class="state empty">
+        <text>未找到相关内容</text>
+        <text class="hint">试试更短关键词，或切换搜索类型</text>
+        <view class="empty-actions">
+          <button size="mini" bindtap="goHome">返回首页</button>
+          <button size="mini" bindtap="onSearchConfirm">重新搜索</button>
+        </view>
+      </view>
+      <view
+        wx:for="{{topics}}"
+        wx:key="id"
+        class="topic-card"
+        data-id="{{item.id}}"
+        bindtap="goTopic"
+      >
+        <image wx:if="{{item.coverUrl}}" class="topic-cover" src="{{item.coverUrl}}" mode="aspectFill" />
+        <view class="topic-body {{item.coverUrl ? 'overlay' : ''}}">
+          <text class="topic-title">{{item.title}}</text>
+          <text class="topic-desc" wx:if="{{item.description}}">{{item.description}}</text>
+          <text class="topic-meta">{{item.metaText}}</text>
+        </view>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view wx:if="{{!articles.length}}" class="state empty">
+        <text>未找到相关内容</text>
+        <text class="hint">试试更短关键词，或切换搜索类型</text>
+        <view class="empty-actions">
+          <button size="mini" bindtap="goHome">返回首页</button>
+          <button size="mini" bindtap="onSearchConfirm">重新搜索</button>
+        </view>
+      </view>
+      <article-list-card
+        wx:for="{{articles}}"
+        wx:key="id"
+        item="{{item}}"
+        variant="search"
+        bind:tapcard="onTapCard"
+        bind:tapauthor="onTapAuthor"
+      />
+    </block>
+
+    <view wx:if="{{hasMore}}" class="more" bindtap="loadMore">
+      {{loadingMore ? '加载中…' : '加载更多结果'}}
+    </view>
+  </block>
+</view>

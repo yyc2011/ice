@@ -81,6 +81,8 @@ Page({
     categoryPickerHeight: 400,
     selectedCategoryId: null as number | null,
     selectedCategoryLabel: '',
+    topicId: null as number | null,
+    topicTitle: '',
     saving: false,
     publishing: false,
   },
@@ -90,12 +92,16 @@ Page({
     const menuRect = wx.getMenuButtonBoundingClientRect()
     const articleId = options.articleId ? Number(options.articleId) : 0
     const from = options.from || 'home'
+    const topicId = options.topic_id ? Number(options.topic_id) : null
+    const topicTitle = options.topic_title ? decodeURIComponent(options.topic_title) : ''
     this.setData({
       statusBarHeight: sys.statusBarHeight || 20,
       navPaddingRight: sys.windowWidth - menuRect.left + 8,
       categoryPickerHeight: Math.floor(sys.windowHeight * 0.45),
       articleId,
       from,
+      topicId: topicId && topicId > 0 ? topicId : null,
+      topicTitle,
     })
     this.loadCategories()
     this.loadWordLimit()
@@ -310,7 +316,7 @@ Page({
       content: this.data.content.trim(),
       tagIds: this.data.selectedTags.map((t) => t.id!),
       categoryId: this.data.selectedCategoryId ?? undefined,
-      topicId: undefined,
+      topicId: this.data.topicId ?? undefined,
       coverUrl: undefined,
       imageUrls: [],
     }

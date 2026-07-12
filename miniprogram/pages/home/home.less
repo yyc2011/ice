@@ -66,59 +66,8 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  height: 320rpx; /* 200 cover + 12 + 72 title + 4 + 32 meta */
-  white-space: nowrap;
-}
-
-.topic-card {
-  flex-shrink: 0;
-  width: 200rpx;
-  margin-right: 20rpx;
-}
-
-.topic-cover {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 12rpx;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.topic-cover image {
-  width: 100%;
-  height: 100%;
-}
-
-.topic-cover-text {
-  color: #fff;
-  font-size: 24rpx;
-  padding: 12rpx;
-  text-align: center;
-}
-
-.topic-name {
-  margin-top: 12rpx;
-  height: 72rpx;
-  line-height: 36rpx;
-  font-size: 26rpx;
-  font-weight: 500;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.topic-meta {
-  margin-top: 4rpx;
-  height: 32rpx;
-  line-height: 32rpx;
-  font-size: 22rpx;
-  color: #969799;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* 220 + 12 + 32 + 12 + 48 + 卡底 padding，避免裁切「去参与」 */
+  height: 380rpx;
   white-space: nowrap;
 }
 

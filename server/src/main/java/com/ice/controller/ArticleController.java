@@ -50,8 +50,14 @@ public class ArticleController {
     }
 
     @GetMapping("/featured")
-    public FeaturedArticlesResponse featured(@RequestParam(defaultValue = "10") int size) {
-        return articleService.listFeatured(Math.min(Math.max(size, 1), 50));
+    public FeaturedArticlesResponse featured(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return articleService.listFeatured(
+                Math.max(page, 1),
+                Math.min(Math.max(size, 1), 50)
+        );
     }
 
     @GetMapping("/{id}")

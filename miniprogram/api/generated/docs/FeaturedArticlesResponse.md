@@ -7,6 +7,9 @@
 Name | Type
 ------------ | -------------
 `items` | [Array&lt;FeaturedArticleItemDto&gt;](FeaturedArticleItemDto.md)
+`total` | number
+`page` | number
+`size` | number
 
 ## Example
 
@@ -16,6 +19,9 @@ import type { FeaturedArticlesResponse } from ''
 // TODO: Update the object below with actual values
 const example = {
   "items": null,
+  "total": null,
+  "page": null,
+  "size": null,
 } satisfies FeaturedArticlesResponse
 
 console.log(example)

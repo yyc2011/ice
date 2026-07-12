@@ -1,0 +1,21 @@
+<view class="topic-card">
+  <view class="topic-card-bg" style="background: {{bgStyle}};" bindtap="onTapCard">
+    <image
+      wx:if="{{item.coverUrl}}"
+      class="topic-card-cover"
+      src="{{item.coverUrl}}"
+      mode="aspectFill"
+    />
+    <view class="topic-card-content {{item.coverUrl ? 'topic-card-content--cover' : ''}}">
+      <text class="topic-card-title">{{item.title}}</text>
+      <text class="topic-card-desc" wx:if="{{item.description}}">{{item.description}}</text>
+    </view>
+  </view>
+  <view class="topic-card-footer">
+    <text>📝 {{item.articleCount || 0}}篇</text>
+    <text wx:if="{{item.daysRemaining !== null && item.daysRemaining !== undefined}}">
+      ⏳ 还剩{{item.daysRemaining}}天
+    </text>
+  </view>
+  <view wx:if="{{showJoin}}" class="topic-card-join" bindtap="onTapJoin">去参与 →</view>
+</view>

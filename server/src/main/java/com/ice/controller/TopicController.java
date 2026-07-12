@@ -3,6 +3,7 @@ package com.ice.controller;
 import com.ice.auth.AuthContext;
 import com.ice.dto.topic.CreateTopicRequest;
 import com.ice.dto.topic.CreateTopicResponse;
+import com.ice.dto.topic.TopicArticlesResponse;
 import com.ice.dto.topic.TopicDetailResponse;
 import com.ice.dto.topic.TopicListResponse;
 import com.ice.service.TopicService;
@@ -57,6 +58,16 @@ public class TopicController {
     @GetMapping("/{id}")
     public TopicDetailResponse detail(@PathVariable long id) {
         return topicService.getDetail(id);
+    }
+
+    @GetMapping("/{id}/articles")
+    public TopicArticlesResponse articles(
+            @PathVariable long id,
+            @RequestParam(defaultValue = "hot") String sort,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return topicService.listTopicArticles(id, sort, page, Math.min(Math.max(size, 1), 50));
     }
 
     @PostMapping

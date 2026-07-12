@@ -1,7 +1,9 @@
 import { ensureLogin } from '../../api/auth'
-import { topicApi } from '../../api/instances'
+import { meApi, topicApi } from '../../api/instances'
 import type { TopicItemDto } from '../../api/generated/models/TopicItemDto'
 import { showApiError } from '../../utils/request'
+
+const TOPIC_CREATE_LEVELS = new Set(['growth', 'creator', 'seasoned', 'master'])
 
 Page({
   data: {
@@ -85,15 +87,32 @@ Page({
     wx.navigateTo({ url: `/pages/topic-detail/topic-detail?id=${id}` })
   },
 
-  goWriteWithTopic(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id
-    const title = e.currentTarget.dataset.title
+  onTopicCard(e: WechatMiniprogram.CustomEvent) {
+    const id = e.detail.id
+    if (id) {
+      wx.navigateTo({ url: `/pages/topic-detail/topic-detail?id=${id}` })
+    }
+  },
+
+  onTopicJoin(e: WechatMiniprogram.CustomEvent) {
+    const { id, title } = e.detail as { id?: number; title?: string }
+    if (!id) return
     wx.navigateTo({
-      url: `/pages/write/write?topic_id=${id}&topic_title=${encodeURIComponent(title)}`,
+      url: `/pages/write/write?topic_id=${id}&topic_title=${encodeURIComponent(title || '')}&from=topics`,
     })
   },
 
-  goCreateTopic() {
-    wx.navigateTo({ url: '/pages/topic-create/topic-create' })
+  async goCreateTopic() {
+    try {
+      await ensureLogin()
+      const me = await meApi.getMe()
+      if (!TOPIC_CREATE_LEVELS.has(me.level || '')) {
+        wx.showToast({ title: '达到成长等级后可发起话题', icon: 'none' })
+        return
+      }
+      wx.navigateTo({ url: '/pages/topic-create/topic-create' })
+    } catch (e) {
+      showApiError(e)
+    }
   },
 })

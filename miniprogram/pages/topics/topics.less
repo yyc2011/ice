@@ -1,6 +1,6 @@
 .page {
   padding: 24rpx;
-  padding-bottom: 200rpx;
+  padding-bottom: calc(280rpx + env(safe-area-inset-bottom));
   background: #f7f8fa;
   min-height: 100vh;
   box-sizing: border-box;
@@ -41,51 +41,14 @@
   padding-top: 16rpx;
 }
 
+/* 横向 scroll-view 必须写死高度；卡片样式见 topic-card 组件（约 2.5 卡宽） */
 .ongoing-scroll {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  /* 与首页一致，留足「去参与」完整高度 */
+  height: 380rpx;
   white-space: nowrap;
-  display: flex;
-}
-
-.ongoing-card {
-  display: inline-block;
-  width: 85vw;
-  max-width: 600rpx;
-  margin-right: 20rpx;
-  vertical-align: top;
-}
-
-.ongoing-bg {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border-radius: 16rpx;
-  padding: 32rpx;
-  min-height: 200rpx;
-  color: #fff;
-}
-
-.ongoing-title {
-  display: block;
-  font-size: 36rpx;
-  font-weight: 600;
-}
-
-.ongoing-desc {
-  display: block;
-  font-size: 24rpx;
-  margin-top: 16rpx;
-  opacity: 0.9;
-}
-
-.ongoing-footer {
-  display: flex;
-  gap: 24rpx;
-  font-size: 24rpx;
-  color: #646566;
-  margin: 16rpx 0;
-}
-
-.join-btn {
-  background: #1989fa !important;
-  color: #fff !important;
 }
 
 .upcoming-item {
@@ -181,12 +144,14 @@
 .fab {
   position: fixed;
   right: 32rpx;
-  bottom: 200rpx;
+  /* tabBar 实际占位约 100rpx+双倍安全区风险，抬高避免与顶部分割线重叠 */
+  bottom: calc(220rpx + env(safe-area-inset-bottom));
   background: #1989fa;
   color: #fff;
-  padding: 24rpx 32rpx;
+  padding: 20rpx 32rpx;
   border-radius: 48rpx;
   font-size: 28rpx;
+  line-height: 1.2;
   box-shadow: 0 8rpx 24rpx rgba(25, 137, 250, 0.4);
-  z-index: 100;
+  z-index: 10000;
 }

@@ -8,6 +8,7 @@ public record TopicDetailResponse(
         String status,
         int article_count,
         int view_count,
+        int like_count,
         int duration_days,
         int reward_pool_amount,
         String start_at,

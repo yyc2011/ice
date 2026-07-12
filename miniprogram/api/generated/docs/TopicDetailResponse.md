@@ -13,6 +13,7 @@ Name | Type
 `status` | string
 `articleCount` | number
 `viewCount` | number
+`likeCount` | number
 `durationDays` | number
 `rewardPoolAmount` | number
 `startAt` | string
@@ -34,6 +35,7 @@ const example = {
   "status": null,
   "articleCount": null,
   "viewCount": null,
+  "likeCount": null,
   "durationDays": null,
   "rewardPoolAmount": null,
   "startAt": null,

@@ -1,5 +1,40 @@
-<view class="placeholder">
-  <text class="title">{{title}}</text>
-  <text class="desc">完整页面即将上线</text>
-  <button bindtap="goBack">返回</button>
+<view class="page">
+  <view class="tabs">
+    <view
+      class="tab {{window === '24h' ? 'active' : ''}}"
+      data-window="24h"
+      bindtap="onWindowTab"
+    >24小时</view>
+    <view
+      class="tab {{window === '7d' ? 'active' : ''}}"
+      data-window="7d"
+      bindtap="onWindowTab"
+    >7天</view>
+    <view
+      class="tab {{window === '30d' ? 'active' : ''}}"
+      data-window="30d"
+      bindtap="onWindowTab"
+    >30天</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+
+  <view wx:elif="{{error}}" class="state">
+    <text>网络异常，请稍后重试</text>
+    <button class="retry" size="mini" bindtap="loadList">重试</button>
+  </view>
+
+  <view wx:elif="{{!items.length}}" class="state">当前时间窗暂无上榜文章</view>
+
+  <block wx:else>
+    <article-list-card
+      wx:for="{{items}}"
+      wx:key="id"
+      item="{{item}}"
+      variant="hot"
+      showRank="{{true}}"
+      bind:tapcard="onTapCard"
+      bind:tapauthor="onTapAuthor"
+    />
+  </block>
 </view>

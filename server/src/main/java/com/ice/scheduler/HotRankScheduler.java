@@ -44,7 +44,7 @@ public class HotRankScheduler {
             return;
         }
 
-        HotRankingResponse ranking = rankingService.getHotRanking("24h", 10);
+        HotRankingResponse ranking = rankingService.getHotRanking("24h", 10, false);
         int rank = 1;
         for (HotRankingItemDto item : ranking.items()) {
             int reward = rank <= HOTRANK_REWARDS.length ? HOTRANK_REWARDS[rank - 1] : 0;

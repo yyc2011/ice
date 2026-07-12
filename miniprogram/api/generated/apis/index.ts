@@ -13,6 +13,8 @@ export * from './ConfigControllerApi';
 export * from './MeControllerApi';
 export * from './NotificationControllerApi';
 export * from './RankingControllerApi';
+export * from './SearchControllerApi';
 export * from './TagControllerApi';
 export * from './TestEssayControllerApi';
 export * from './TopicControllerApi';
+export * from './UploadControllerApi';

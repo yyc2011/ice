@@ -10,23 +10,13 @@
     <view class="section" wx:if="{{ongoing.length}}">
       <view class="section-title">进行中</view>
       <scroll-view scroll-x class="ongoing-scroll" enable-flex>
-        <view wx:for="{{ongoing}}" wx:key="id" class="ongoing-card">
-          <view class="ongoing-bg" data-id="{{item.id}}" bindtap="goTopicDetail">
-            <text class="ongoing-title">{{item.title}}</text>
-            <text class="ongoing-desc" wx:if="{{item.description}}">{{item.description}}</text>
-          </view>
-          <view class="ongoing-footer">
-            <text>📝 {{item.articleCount}}篇</text>
-            <text wx:if="{{item.daysRemaining !== null}}">⏳ 还剩{{item.daysRemaining}}天</text>
-          </view>
-          <button
-            class="join-btn"
-            size="mini"
-            data-id="{{item.id}}"
-            data-title="{{item.title}}"
-            bindtap="goWriteWithTopic"
-          >去参与 →</button>
-        </view>
+        <topic-card
+          wx:for="{{ongoing}}"
+          wx:key="id"
+          item="{{item}}"
+          bind:tapcard="onTopicCard"
+          bind:tapjoin="onTopicJoin"
+        />
       </scroll-view>
     </view>
 

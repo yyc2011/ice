@@ -21,12 +21,17 @@ import com.ice.dto.article.TagDto;
 import com.ice.exception.ApiException;
 import com.ice.generated.jooq.tables.records.ArticleRecord;
 import com.ice.generated.jooq.tables.records.ContentReviewRecord;
+import com.ice.domain.UserLevel;
+import com.ice.util.ContentSummary;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.jooq.DSLContext;
 import org.jooq.JSON;
 import org.springframework.http.HttpStatus;
@@ -233,63 +238,144 @@ public class ArticleService {
         return applyAuditResult(articleId, article.getUserId(), article.getTitle(), reviewId, aiResponse);
     }
 
-    public FeaturedArticlesResponse listFeatured(int limit) {
+    public FeaturedArticlesResponse listFeatured(int page, int size) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        List<FeaturedArticleItemDto> all = collectFeatured(200);
+        int total = all.size();
+        int from = (safePage - 1) * safeSize;
+        if (from >= total) {
+            return new FeaturedArticlesResponse(List.of(), total, safePage, safeSize);
+        }
+        int to = Math.min(from + safeSize, total);
+        return new FeaturedArticlesResponse(all.subList(from, to), total, safePage, safeSize);
+    }
+
+    private List<FeaturedArticleItemDto> collectFeatured(int maxItems) {
         int featuredDays = rankingConfigService.getInt("featured_days", 7);
         double aiWeight = rankingConfigService.getDouble("featured_ai_weight", 0.7);
         double freshWeight = rankingConfigService.getDouble("featured_fresh_weight", 0.3);
-        LocalDateTime since = LocalDateTime.now().minusDays(featuredDays);
+        Duration base = Duration.ofDays(featuredDays);
+        LocalDateTime now = LocalDateTime.now();
+
+        List<FeaturedArticleItemDto> items = new ArrayList<>();
+        Set<Long> seenIds = new HashSet<>();
+        int periods = 1;
+
+        while (items.size() < maxItems) {
+            LocalDateTime end = periods == 1 ? now : now.minus(base.multipliedBy(periods - 1L));
+            LocalDateTime start = now.minus(base.multipliedBy(periods));
+
+            List<ScoredFeatured> slice = scoreFeaturedInRange(
+                    start, end, periods == 1, now, aiWeight, freshWeight);
+            slice.sort(Comparator.comparingDouble(ScoredFeatured::featuredScore).reversed());
+
+            for (ScoredFeatured article : slice) {
+                if (items.size() >= maxItems) {
+                    break;
+                }
+                if (!seenIds.add(article.id())) {
+                    continue;
+                }
+                items.add(new FeaturedArticleItemDto(
+                        article.id(),
+                        article.title(),
+                        article.coverUrl(),
+                        article.summary(),
+                        article.authorId(),
+                        article.authorNickname(),
+                        article.authorAvatarUrl(),
+                        article.authorLevelName(),
+                        article.categoryName() == null ? "综合" : article.categoryName(),
+                        article.viewCount(),
+                        Math.round(article.featuredScore() * 10.0) / 10.0,
+                        article.publishedAt() == null ? null : toInstant(article.publishedAt()).toString()
+                ));
+            }
+
+            if (items.size() >= maxItems) {
+                break;
+            }
+            if (!hasPublishedBefore(start)) {
+                break;
+            }
+            periods++;
+        }
+
+        return items;
+    }
+
+    private List<ScoredFeatured> scoreFeaturedInRange(
+            LocalDateTime startInclusive,
+            LocalDateTime end,
+            boolean endInclusive,
+            LocalDateTime now,
+            double aiWeight,
+            double freshWeight
+    ) {
+        var publishedAtCond = endInclusive
+                ? ARTICLE.PUBLISHED_AT.ge(startInclusive).and(ARTICLE.PUBLISHED_AT.le(end))
+                : ARTICLE.PUBLISHED_AT.ge(startInclusive).and(ARTICLE.PUBLISHED_AT.lt(end));
 
         var records = dsl.select(
                         ARTICLE.ID,
                         ARTICLE.TITLE,
+                        ARTICLE.CONTENT,
                         ARTICLE.COVER_URL,
+                        ARTICLE.VIEW_COUNT,
                         ARTICLE.AI_QUALITY_SCORE,
                         ARTICLE.PUBLISHED_AT,
+                        ARTICLE.USER_ID,
                         USER.NICKNAME,
+                        USER.AVATAR_URL,
+                        USER.LEVEL,
                         CATEGORY.NAME
                 )
                 .from(ARTICLE)
                 .join(USER).on(USER.ID.eq(ARTICLE.USER_ID))
                 .leftJoin(CATEGORY).on(CATEGORY.ID.eq(ARTICLE.CATEGORY_ID))
                 .where(ARTICLE.STATUS.eq(ArticleStatus.PUBLISHED.code()))
-                .and(ARTICLE.PUBLISHED_AT.ge(since))
+                .and(publishedAtCond)
                 .fetch();
 
         List<ScoredFeatured> scored = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
         for (var record : records) {
             int aiScore = record.get(ARTICLE.AI_QUALITY_SCORE) == null ? 70 : record.get(ARTICLE.AI_QUALITY_SCORE).intValue();
             LocalDateTime publishedAt = record.get(ARTICLE.PUBLISHED_AT);
-            long hours = publishedAt == null ? 0 : java.time.Duration.between(publishedAt, now).toHours();
+            long hours = publishedAt == null ? 0 : Duration.between(publishedAt, now).toHours();
             double freshness = Math.max(0, 100 - hours * 2.0);
             double featuredScore = aiScore * aiWeight + freshness * freshWeight;
+            byte levelCode = record.get(USER.LEVEL) == null
+                    ? UserLevel.READER.code()
+                    : record.get(USER.LEVEL).byteValue();
+            String levelName = UserLevel.fromCode(levelCode).displayName();
+            int views = record.get(ARTICLE.VIEW_COUNT) == null ? 0 : record.get(ARTICLE.VIEW_COUNT);
             scored.add(new ScoredFeatured(
                     record.get(ARTICLE.ID),
                     record.get(ARTICLE.TITLE),
                     record.get(ARTICLE.COVER_URL),
+                    ContentSummary.summarize(record.get(ARTICLE.CONTENT), 60),
+                    record.get(ARTICLE.USER_ID),
                     record.get(USER.NICKNAME),
+                    record.get(USER.AVATAR_URL),
+                    levelName,
                     record.get(CATEGORY.NAME),
+                    views,
                     featuredScore,
                     publishedAt
             ));
         }
-        scored.sort(Comparator.comparingDouble(ScoredFeatured::featuredScore).reversed());
-        List<FeaturedArticleItemDto> items = new ArrayList<>();
-        for (ScoredFeatured article : scored) {
-            if (items.size() >= limit) {
-                break;
-            }
-            items.add(new FeaturedArticleItemDto(
-                    article.id(),
-                    article.title(),
-                    article.coverUrl(),
-                    article.authorNickname(),
-                    article.categoryName() == null ? "综合" : article.categoryName(),
-                    Math.round(article.featuredScore() * 10.0) / 10.0,
-                    article.publishedAt() == null ? null : toInstant(article.publishedAt()).toString()
-            ));
-        }
-        return new FeaturedArticlesResponse(items);
+        return scored;
+    }
+
+    private boolean hasPublishedBefore(LocalDateTime before) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(ARTICLE)
+                        .where(ARTICLE.STATUS.eq(ArticleStatus.PUBLISHED.code()))
+                        .and(ARTICLE.PUBLISHED_AT.lt(before))
+                        .and(ARTICLE.PUBLISHED_AT.isNotNull())
+        );
     }
 
     public ArticleDetailResponse getArticle(long userId, long articleId) {
@@ -553,8 +639,13 @@ public class ArticleService {
             long id,
             String title,
             String coverUrl,
+            String summary,
+            Long authorId,
             String authorNickname,
+            String authorAvatarUrl,
+            String authorLevelName,
             String categoryName,
+            int viewCount,
             double featuredScore,
             LocalDateTime publishedAt
     ) {

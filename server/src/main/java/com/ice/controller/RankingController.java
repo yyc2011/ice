@@ -23,6 +23,6 @@ public class RankingController {
             @RequestParam(defaultValue = "10") int size
     ) {
         int limit = Math.min(Math.max(size, 1), 50);
-        return rankingService.getHotRanking(window, limit);
+        return rankingService.getHotRanking(window, limit, true);
     }
 }

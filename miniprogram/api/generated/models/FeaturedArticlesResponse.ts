@@ -34,6 +34,24 @@ export interface FeaturedArticlesResponse {
      * @memberof FeaturedArticlesResponse
      */
     items?: Array<FeaturedArticleItemDto>;
+    /**
+     * 
+     * @type {number}
+     * @memberof FeaturedArticlesResponse
+     */
+    total?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof FeaturedArticlesResponse
+     */
+    page?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof FeaturedArticlesResponse
+     */
+    size?: number;
 }
 
 /**
@@ -54,6 +72,9 @@ export function FeaturedArticlesResponseFromJSONTyped(json: any, ignoreDiscrimin
     return {
         
         'items': json['items'] == null ? undefined : ((json['items'] as Array<any>).map(FeaturedArticleItemDtoFromJSON)),
+        'total': json['total'] == null ? undefined : json['total'],
+        'page': json['page'] == null ? undefined : json['page'],
+        'size': json['size'] == null ? undefined : json['size'],
     };
 }
 
@@ -69,6 +90,9 @@ export function FeaturedArticlesResponseToJSONTyped(value?: FeaturedArticlesResp
     return {
         
         'items': value['items'] == null ? undefined : ((value['items'] as Array<any>).map(FeaturedArticleItemDtoToJSON)),
+        'total': value['total'],
+        'page': value['page'],
+        'size': value['size'],
     };
 }
 

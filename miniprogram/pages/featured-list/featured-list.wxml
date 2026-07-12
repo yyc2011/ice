@@ -1,1 +1,25 @@
-<view class="placeholder"><text class="title">{{title}}</text><text class="desc">完整页面即将上线</text><button bindtap="goBack">返回</button></view>
+<view class="page">
+  <view wx:if="{{loading}}" class="state">加载中…</view>
+
+  <view wx:elif="{{error}}" class="state">
+    <text>网络异常，请稍后重试</text>
+    <button class="retry" size="mini" bindtap="retry">重试</button>
+  </view>
+
+  <view wx:elif="{{!items.length}}" class="state">暂无精选新文</view>
+
+  <block wx:else>
+    <article-list-card
+      wx:for="{{items}}"
+      wx:key="id"
+      item="{{item}}"
+      variant="featured"
+      bind:tapcard="onTapCard"
+      bind:tapauthor="onTapAuthor"
+    />
+    <view wx:if="{{hasMore}}" class="more" bindtap="loadMore">
+      {{loadingMore ? '加载中…' : '加载更多内容'}}
+    </view>
+    <view wx:else class="more muted">没有更多了</view>
+  </block>
+</view>

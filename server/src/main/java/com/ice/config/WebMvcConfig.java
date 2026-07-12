@@ -27,7 +27,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/categories/**",
                         "/api/v1/config/**",
                         "/api/v1/rankings/**",
-                        "/api/v1/topics/ongoing"
+                        "/api/v1/topics/ongoing",
+                        "/api/v1/topics/*",
+                        "/api/v1/topics/*/articles",
+                        "/api/v1/search",
+                        "/api/v1/uploads/files/**"
                 );
         registry.addInterceptor(adminAuthInterceptor)
                 .addPathPatterns("/api/v1/admin/**");

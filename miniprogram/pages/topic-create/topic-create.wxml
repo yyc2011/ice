@@ -1,1 +1,114 @@
-<view class="placeholder"><text class="title">{{title}}</text><text class="desc">发起话题页即将上线</text><button bindtap="goBack">返回</button></view>
+<view class="page" wx:if="{{success}}">
+  <view class="success">
+    <text class="success-icon">✅</text>
+    <text class="success-title">话题已提交审核</text>
+    <text class="success-desc">{{successMessage}}</text>
+    <text class="success-hint">可在「我的」→「我发起的话题」查看进度</text>
+    <view class="success-actions">
+      <button class="btn primary" bindtap="backToTopics">返回话题页</button>
+      <button class="btn" bindtap="goMyTopics">查看我的话题 →</button>
+    </view>
+  </view>
+</view>
+
+<view class="page" wx:else>
+  <view class="field">
+    <text class="label">话题标题（必填，最多20字）</text>
+    <input
+      class="input"
+      maxlength="20"
+      placeholder="请输入话题标题..."
+      value="{{title}}"
+      bindinput="onTitleInput"
+    />
+  </view>
+
+  <view class="field">
+    <text class="label">话题描述（选填，最多200字）</text>
+    <textarea
+      class="textarea"
+      maxlength="200"
+      placeholder="描述写作方向、参与规则..."
+      value="{{description}}"
+      bindinput="onDescInput"
+    />
+  </view>
+
+  <view class="field">
+    <text class="label">持续时间（必选）</text>
+    <view class="radio-row">
+      <view
+        class="radio {{durationDays === 7 ? 'on' : ''}}"
+        data-days="7"
+        bindtap="onDuration"
+      >○ 7天</view>
+      <view
+        class="radio {{durationDays === 14 ? 'on' : ''}}"
+        data-days="14"
+        bindtap="onDuration"
+      >○ 14天</view>
+      <view
+        class="radio {{durationDays === 30 ? 'on' : ''}}"
+        data-days="30"
+        bindtap="onDuration"
+      >○ 30天</view>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="label">封面图（选填）</text>
+    <view class="cover-row">
+      <view class="cover-box" bindtap="chooseCover">
+        <image wx:if="{{coverUrl}}" src="{{coverUrl}}" mode="aspectFill" />
+        <text wx:else>＋ 上传封面</text>
+      </view>
+      <text wx:if="{{coverUrl}}" class="clear" bindtap="clearCover">清除</text>
+    </view>
+  </view>
+
+  <view class="field">
+    <text class="label">奖励池（选填，最低50书币）</text>
+    <view class="inline">
+      <text>充值书币数：</text>
+      <input class="num" type="number" value="{{rewardPool}}" bindinput="onRewardPoolInput" />
+    </view>
+    <view class="inline">
+      <text>奖励 Top N：</text>
+      <view
+        class="chip {{rewardTopN === 3 ? 'on' : ''}}"
+        data-n="3"
+        bindtap="onTopN"
+      >Top3</view>
+      <view
+        class="chip {{rewardTopN === 5 ? 'on' : ''}}"
+        data-n="5"
+        bindtap="onTopN"
+      >Top5</view>
+    </view>
+    <view class="inline">
+      <text>分配比例：</text>
+      <input class="ratio" value="{{rewardRatio}}" bindinput="onRatioInput" />
+    </view>
+  </view>
+
+  <view class="cost-box">
+    <text class="label">费用明细</text>
+    <view class="cost-line"><text>发起话题</text><text>{{costCreate}} 书币</text></view>
+    <view class="cost-line"><text>奖励池</text><text>{{rewardPool >= 50 ? rewardPool : 0}} 书币</text></view>
+    <view class="cost-line total"><text>合计</text><text>{{totalCost}} 书币</text></view>
+    <view class="cost-line">
+      <text>当前余额</text>
+      <text>{{balance}} 书币</text>
+    </view>
+    <view wx:if="{{balance < totalCost}}" class="warn" bindtap="goRecharge">
+      余额不足，去充值 →
+    </view>
+  </view>
+
+  <button
+    class="submit {{canSubmit ? '' : 'disabled'}}"
+    disabled="{{!canSubmit}}"
+    loading="{{submitting}}"
+    bindtap="submit"
+  >提交并支付书币</button>
+</view>

@@ -1,3 +1,168 @@
-.placeholder { padding: 120rpx 48rpx; text-align: center; }
-.title { display: block; font-size: 36rpx; font-weight: 600; margin-bottom: 16rpx; }
-.desc { display: block; color: #969799; margin-bottom: 48rpx; }
+.page {
+  padding: 24rpx;
+  background: #f7f8fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 8rpx 8rpx 8rpx 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.input {
+  flex: 1;
+  font-size: 28rpx;
+  height: 64rpx;
+}
+
+.type {
+  padding: 0 20rpx;
+  font-size: 26rpx;
+  color: #1989fa;
+  white-space: nowrap;
+}
+
+.type-panel {
+  background: #fff;
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+}
+
+.type-option {
+  padding: 24rpx;
+  font-size: 28rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+
+.type-option.on {
+  color: #1989fa;
+  font-weight: 600;
+}
+
+.info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #969799;
+  margin-bottom: 16rpx;
+}
+
+.state {
+  text-align: center;
+  color: #969799;
+  padding: 80rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.state.empty .hint {
+  font-size: 24rpx;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.user-card {
+  display: flex;
+  gap: 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #f2f3f5;
+}
+
+.user-body {
+  flex: 1;
+}
+
+.name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.bio {
+  display: block;
+  font-size: 24rpx;
+  color: #646566;
+  margin: 8rpx 0;
+}
+
+.meta {
+  font-size: 22rpx;
+  color: #969799;
+}
+
+.topic-card {
+  position: relative;
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-bottom: 16rpx;
+  background: #fff;
+  min-height: 200rpx;
+}
+
+.topic-cover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.topic-body {
+  position: relative;
+  padding: 32rpx;
+}
+
+.topic-body.overlay {
+  background: linear-gradient(135deg, rgba(240, 147, 251, 0.85), rgba(245, 87, 108, 0.85));
+  color: #fff;
+  min-height: 200rpx;
+}
+
+.topic-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.topic-desc {
+  display: block;
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topic-meta {
+  font-size: 22rpx;
+}
+
+.more {
+  text-align: center;
+  color: #1989fa;
+  font-size: 26rpx;
+  padding: 24rpx 0 48rpx;
+}

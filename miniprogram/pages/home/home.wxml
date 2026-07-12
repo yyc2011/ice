@@ -13,20 +13,13 @@
         <text class="section-title">热门话题</text>
       </view>
       <scroll-view scroll-x class="topic-scroll" enable-flex>
-        <view
+        <topic-card
           wx:for="{{topics}}"
           wx:key="id"
-          class="topic-card"
-          data-id="{{item.id}}"
-          bindtap="goTopicDetail"
-        >
-          <view class="topic-cover">
-            <image wx:if="{{item.coverUrl}}" src="{{item.coverUrl}}" mode="aspectFill" />
-            <text wx:else class="topic-cover-text">{{item.title}}</text>
-          </view>
-          <text class="topic-name">{{item.title}}</text>
-          <text class="topic-meta">{{item.articleCount}}篇</text>
-        </view>
+          item="{{item}}"
+          bind:tapcard="onTopicCard"
+          bind:tapjoin="onTopicJoin"
+        />
       </scroll-view>
       <view class="section-link" bindtap="goTopics">查看全部话题 →</view>
     </view>

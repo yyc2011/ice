@@ -1,1 +1,4 @@
-{ "navigationBarTitleText": "发起话题" }
+{
+  "navigationBarTitleText": "发起话题",
+  "usingComponents": {}
+}

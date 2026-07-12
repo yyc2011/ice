@@ -8,9 +8,15 @@ Name | Type
 ------------ | -------------
 `id` | number
 `title` | string
+`authorId` | number
 `authorNickname` | string
+`authorAvatarUrl` | string
+`coverUrl` | string
+`summary` | string
 `viewCount` | number
 `likeCount` | number
+`commentCount` | number
+`publishedAt` | string
 `hotScore` | number
 `rank` | number
 
@@ -23,9 +29,15 @@ import type { HotRankingItemDto } from ''
 const example = {
   "id": null,
   "title": null,
+  "authorId": null,
   "authorNickname": null,
+  "authorAvatarUrl": null,
+  "coverUrl": null,
+  "summary": null,
   "viewCount": null,
   "likeCount": null,
+  "commentCount": null,
+  "publishedAt": null,
   "hotScore": null,
   "rank": null,
 } satisfies HotRankingItemDto

@@ -23,6 +23,10 @@ spring:
     locations: classpath:db/migration
     encoding: UTF-8
     baseline-on-migrate: true
+  servlet:
+    multipart:
+      max-file-size: 6MB
+      max-request-size: 8MB
 
 server:
   port: 8080
@@ -65,3 +69,7 @@ ice:
     code-expire-seconds: ${SMS_CODE_EXPIRE_SECONDS:300}
     send-cooldown-seconds: ${SMS_SEND_COOLDOWN_SECONDS:60}
     daily-limit: ${SMS_DAILY_LIMIT:10}
+  upload:
+    local-dir: ${ICE_UPLOAD_DIR:./data/uploads}
+    public-base-path: /api/v1/uploads/files
+    max-size-mb: ${ICE_UPLOAD_MAX_MB:5}

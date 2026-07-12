@@ -67,6 +67,12 @@ export interface TopicDetailResponse {
      * @type {number}
      * @memberof TopicDetailResponse
      */
+    likeCount?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof TopicDetailResponse
+     */
     durationDays?: number;
     /**
      * 
@@ -124,6 +130,7 @@ export function TopicDetailResponseFromJSONTyped(json: any, ignoreDiscriminator:
         'status': json['status'] == null ? undefined : json['status'],
         'articleCount': json['article_count'] == null ? undefined : json['article_count'],
         'viewCount': json['view_count'] == null ? undefined : json['view_count'],
+        'likeCount': json['like_count'] == null ? undefined : json['like_count'],
         'durationDays': json['duration_days'] == null ? undefined : json['duration_days'],
         'rewardPoolAmount': json['reward_pool_amount'] == null ? undefined : json['reward_pool_amount'],
         'startAt': json['start_at'] == null ? undefined : json['start_at'],
@@ -151,6 +158,7 @@ export function TopicDetailResponseToJSONTyped(value?: TopicDetailResponse | nul
         'status': value['status'],
         'article_count': value['articleCount'],
         'view_count': value['viewCount'],
+        'like_count': value['likeCount'],
         'duration_days': value['durationDays'],
         'reward_pool_amount': value['rewardPoolAmount'],
         'start_at': value['startAt'],

@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "搜索" }
+{
+  "navigationBarTitleText": "搜索",
+  "usingComponents": {
+    "article-list-card": "/components/article-list-card/article-list-card"
+  }
+}

@@ -34,10 +34,34 @@ export interface HotRankingItemDto {
     title?: string;
     /**
      * 
+     * @type {number}
+     * @memberof HotRankingItemDto
+     */
+    authorId?: number;
+    /**
+     * 
      * @type {string}
      * @memberof HotRankingItemDto
      */
     authorNickname?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HotRankingItemDto
+     */
+    authorAvatarUrl?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HotRankingItemDto
+     */
+    coverUrl?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof HotRankingItemDto
+     */
+    summary?: string;
     /**
      * 
      * @type {number}
@@ -50,6 +74,18 @@ export interface HotRankingItemDto {
      * @memberof HotRankingItemDto
      */
     likeCount?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof HotRankingItemDto
+     */
+    commentCount?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof HotRankingItemDto
+     */
+    publishedAt?: string;
     /**
      * 
      * @type {number}
@@ -83,9 +119,15 @@ export function HotRankingItemDtoFromJSONTyped(json: any, ignoreDiscriminator: b
         
         'id': json['id'] == null ? undefined : json['id'],
         'title': json['title'] == null ? undefined : json['title'],
+        'authorId': json['author_id'] == null ? undefined : json['author_id'],
         'authorNickname': json['author_nickname'] == null ? undefined : json['author_nickname'],
+        'authorAvatarUrl': json['author_avatar_url'] == null ? undefined : json['author_avatar_url'],
+        'coverUrl': json['cover_url'] == null ? undefined : json['cover_url'],
+        'summary': json['summary'] == null ? undefined : json['summary'],
         'viewCount': json['view_count'] == null ? undefined : json['view_count'],
         'likeCount': json['like_count'] == null ? undefined : json['like_count'],
+        'commentCount': json['comment_count'] == null ? undefined : json['comment_count'],
+        'publishedAt': json['published_at'] == null ? undefined : json['published_at'],
         'hotScore': json['hot_score'] == null ? undefined : json['hot_score'],
         'rank': json['rank'] == null ? undefined : json['rank'],
     };
@@ -104,9 +146,15 @@ export function HotRankingItemDtoToJSONTyped(value?: HotRankingItemDto | null, i
         
         'id': value['id'],
         'title': value['title'],
+        'author_id': value['authorId'],
         'author_nickname': value['authorNickname'],
+        'author_avatar_url': value['authorAvatarUrl'],
+        'cover_url': value['coverUrl'],
+        'summary': value['summary'],
         'view_count': value['viewCount'],
         'like_count': value['likeCount'],
+        'comment_count': value['commentCount'],
+        'published_at': value['publishedAt'],
         'hot_score': value['hotScore'],
         'rank': value['rank'],
     };

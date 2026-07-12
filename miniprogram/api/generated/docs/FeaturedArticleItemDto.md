@@ -9,8 +9,13 @@ Name | Type
 `id` | number
 `title` | string
 `coverUrl` | string
+`summary` | string
+`authorId` | number
 `authorNickname` | string
+`authorAvatarUrl` | string
+`authorLevelName` | string
 `categoryName` | string
+`viewCount` | number
 `featuredScore` | number
 `publishedAt` | string
 
@@ -24,8 +29,13 @@ const example = {
   "id": null,
   "title": null,
   "coverUrl": null,
+  "summary": null,
+  "authorId": null,
   "authorNickname": null,
+  "authorAvatarUrl": null,
+  "authorLevelName": null,
   "categoryName": null,
+  "viewCount": null,
   "featuredScore": null,
   "publishedAt": null,
 } satisfies FeaturedArticleItemDto

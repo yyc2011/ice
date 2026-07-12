@@ -6,6 +6,7 @@ import { ConfigControllerApi } from './generated/apis/ConfigControllerApi'
 import { MeControllerApi } from './generated/apis/MeControllerApi'
 import { NotificationControllerApi } from './generated/apis/NotificationControllerApi'
 import { RankingControllerApi } from './generated/apis/RankingControllerApi'
+import { SearchControllerApi } from './generated/apis/SearchControllerApi'
 import { TagControllerApi } from './generated/apis/TagControllerApi'
 import { TestEssayControllerApi } from './generated/apis/TestEssayControllerApi'
 import { TopicControllerApi } from './generated/apis/TopicControllerApi'
@@ -18,5 +19,6 @@ export const tagApi = new TagControllerApi(apiConfig)
 export const categoryApi = new CategoryControllerApi(apiConfig)
 export const topicApi = new TopicControllerApi(apiConfig)
 export const rankingApi = new RankingControllerApi(apiConfig)
+export const searchApi = new SearchControllerApi(apiConfig)
 export const notificationApi = new NotificationControllerApi(apiConfig)
 export const testEssayApi = new TestEssayControllerApi(apiConfig)

@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "话题",
   "enablePullDownRefresh": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "topic-card": "/components/topic-card/topic-card"
+  }
 }

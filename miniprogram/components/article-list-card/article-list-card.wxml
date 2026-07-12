@@ -1,0 +1,33 @@
+<view class="card" bindtap="onTapCard">
+  <text wx:if="{{showRank}}" class="rank">#{{item.rank}}</text>
+  <text class="title">{{item.title}}</text>
+  <view class="author-row" catchtap="onTapAuthor">
+    <image
+      class="avatar"
+      src="{{item.authorAvatarUrl || '/assets/tab/mine.png'}}"
+      mode="aspectFill"
+    />
+    <text class="nickname">{{item.authorNickname}}</text>
+    <text wx:if="{{item.authorLevelName}}" class="level">{{item.authorLevelName}}</text>
+  </view>
+  <view class="body-row">
+    <text class="summary">{{item.summary || ''}}</text>
+    <image
+      wx:if="{{item.coverUrl}}"
+      class="cover"
+      src="{{item.coverUrl}}"
+      mode="aspectFill"
+    />
+  </view>
+  <view class="meta">
+    <text wx:if="{{item.publishedAt}}">{{item.publishedAt}}</text>
+    <block wx:if="{{variant === 'hot'}}">
+      <text>💬{{item.commentCount || 0}}</text>
+      <text>阅读{{item.viewCount || 0}}</text>
+      <text>♥{{item.likeCount || 0}}</text>
+    </block>
+    <block wx:else>
+      <text>阅读量 {{item.viewCount || 0}}</text>
+    </block>
+  </view>
+</view>

@@ -43,13 +43,43 @@ export interface FeaturedArticleItemDto {
      * @type {string}
      * @memberof FeaturedArticleItemDto
      */
+    summary?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof FeaturedArticleItemDto
+     */
+    authorId?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof FeaturedArticleItemDto
+     */
     authorNickname?: string;
     /**
      * 
      * @type {string}
      * @memberof FeaturedArticleItemDto
      */
+    authorAvatarUrl?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FeaturedArticleItemDto
+     */
+    authorLevelName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FeaturedArticleItemDto
+     */
     categoryName?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof FeaturedArticleItemDto
+     */
+    viewCount?: number;
     /**
      * 
      * @type {number}
@@ -84,8 +114,13 @@ export function FeaturedArticleItemDtoFromJSONTyped(json: any, ignoreDiscriminat
         'id': json['id'] == null ? undefined : json['id'],
         'title': json['title'] == null ? undefined : json['title'],
         'coverUrl': json['cover_url'] == null ? undefined : json['cover_url'],
+        'summary': json['summary'] == null ? undefined : json['summary'],
+        'authorId': json['author_id'] == null ? undefined : json['author_id'],
         'authorNickname': json['author_nickname'] == null ? undefined : json['author_nickname'],
+        'authorAvatarUrl': json['author_avatar_url'] == null ? undefined : json['author_avatar_url'],
+        'authorLevelName': json['author_level_name'] == null ? undefined : json['author_level_name'],
         'categoryName': json['category_name'] == null ? undefined : json['category_name'],
+        'viewCount': json['view_count'] == null ? undefined : json['view_count'],
         'featuredScore': json['featured_score'] == null ? undefined : json['featured_score'],
         'publishedAt': json['published_at'] == null ? undefined : json['published_at'],
     };
@@ -105,8 +140,13 @@ export function FeaturedArticleItemDtoToJSONTyped(value?: FeaturedArticleItemDto
         'id': value['id'],
         'title': value['title'],
         'cover_url': value['coverUrl'],
+        'summary': value['summary'],
+        'author_id': value['authorId'],
         'author_nickname': value['authorNickname'],
+        'author_avatar_url': value['authorAvatarUrl'],
+        'author_level_name': value['authorLevelName'],
         'category_name': value['categoryName'],
+        'view_count': value['viewCount'],
         'featured_score': value['featuredScore'],
         'published_at': value['publishedAt'],
     };

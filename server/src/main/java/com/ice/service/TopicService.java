@@ -12,6 +12,8 @@ import com.ice.domain.TopicStatus;
 import com.ice.domain.UserLevel;
 import com.ice.dto.topic.CreateTopicRequest;
 import com.ice.dto.topic.CreateTopicResponse;
+import com.ice.dto.topic.TopicArticleItemDto;
+import com.ice.dto.topic.TopicArticlesResponse;
 import com.ice.dto.topic.TopicDetailResponse;
 import com.ice.dto.topic.TopicItemDto;
 import com.ice.dto.topic.TopicListResponse;
@@ -25,7 +27,9 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import org.jooq.DSLContext;
 import org.jooq.JSON;
@@ -44,17 +48,20 @@ public class TopicService {
     private final DSLContext dsl;
     private final AiAuditClient aiAuditClient;
     private final BookCoinService bookCoinService;
+    private final RankingService rankingService;
     private final ObjectMapper objectMapper;
 
     public TopicService(
             DSLContext dsl,
             AiAuditClient aiAuditClient,
             BookCoinService bookCoinService,
+            RankingService rankingService,
             ObjectMapper objectMapper
     ) {
         this.dsl = dsl;
         this.aiAuditClient = aiAuditClient;
         this.bookCoinService = bookCoinService;
+        this.rankingService = rankingService;
         this.objectMapper = objectMapper;
     }
 
@@ -82,41 +89,169 @@ public class TopicService {
         return new TopicListResponse(items, all.size());
     }
 
+    /** 展示用：不足 size 时按周期切片向前凑满，最近一周期固定靠前（同热榜规则）。 */
     public TopicListResponse listHistorical(String period, int limit) {
+        return listHistorical(period, limit, true);
+    }
+
+    /**
+     * @param expandToFill true=展示凑满；false=仅最近一个基础周期（结算/统计用，不扩展）
+     */
+    public TopicListResponse listHistorical(String period, int limit, boolean expandToFill) {
+        Duration base = resolveHistoricalBase(period);
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime since = switch (period == null ? "today" : period) {
-            case "month" -> now.minusDays(30);
-            case "year" -> now.minusDays(365);
-            default -> now.minusDays(1);
-        };
-        List<TopicRecord> records = dsl.selectFrom(TOPIC)
-                .where(TOPIC.STATUS.eq(TopicStatus.ENDED.code()))
-                .and(TOPIC.END_AT.ge(since))
-                .orderBy(TOPIC.ARTICLE_COUNT.desc(), TOPIC.END_AT.desc())
-                .limit(limit)
-                .fetch();
-        List<TopicItemDto> items = records.stream().map(this::toItemDto).toList();
+        List<TopicItemDto> items = new ArrayList<>();
+        Set<Long> seenIds = new HashSet<>();
+        int periods = 1;
+
+        while (items.size() < limit) {
+            LocalDateTime end = periods == 1 ? now : now.minus(base.multipliedBy(periods - 1L));
+            LocalDateTime start = now.minus(base.multipliedBy(periods));
+
+            List<TopicRecord> slice = fetchEndedInRange(start, end, periods == 1);
+            slice.sort(Comparator.comparingInt((TopicRecord t) -> t.getArticleCount() == null ? 0 : t.getArticleCount())
+                    .reversed()
+                    .thenComparing(TopicRecord::getEndAt, Comparator.nullsLast(Comparator.reverseOrder())));
+
+            for (TopicRecord record : slice) {
+                if (items.size() >= limit) {
+                    break;
+                }
+                if (!seenIds.add(record.getId())) {
+                    continue;
+                }
+                items.add(toItemDto(record));
+            }
+
+            if (!expandToFill) {
+                break;
+            }
+            if (items.size() >= limit) {
+                break;
+            }
+            if (!hasEndedBefore(start)) {
+                break;
+            }
+            periods++;
+        }
+
         return new TopicListResponse(items, items.size());
+    }
+
+    private Duration resolveHistoricalBase(String period) {
+        return switch (period == null || period.isBlank() ? "today" : period.trim()) {
+            case "month" -> Duration.ofDays(30);
+            case "year" -> Duration.ofDays(365);
+            default -> Duration.ofDays(1);
+        };
+    }
+
+    private List<TopicRecord> fetchEndedInRange(LocalDateTime startInclusive, LocalDateTime end, boolean endInclusive) {
+        var endCond = endInclusive
+                ? TOPIC.END_AT.ge(startInclusive).and(TOPIC.END_AT.le(end))
+                : TOPIC.END_AT.ge(startInclusive).and(TOPIC.END_AT.lt(end));
+        return dsl.selectFrom(TOPIC)
+                .where(TOPIC.STATUS.eq(TopicStatus.ENDED.code()))
+                .and(TOPIC.END_AT.isNotNull())
+                .and(endCond)
+                .fetch();
+    }
+
+    private boolean hasEndedBefore(LocalDateTime before) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(TOPIC)
+                        .where(TOPIC.STATUS.eq(TopicStatus.ENDED.code()))
+                        .and(TOPIC.END_AT.isNotNull())
+                        .and(TOPIC.END_AT.lt(before))
+        );
     }
 
     public TopicDetailResponse getDetail(long topicId) {
         TopicRecord topic = requireTopic(topicId);
         UserRecord creator = dsl.selectFrom(USER).where(USER.ID.eq(topic.getUserId())).fetchOne();
-        return toDetailDto(topic, creator == null ? "未知" : creator.getNickname());
-    }
-
-    public TopicListResponse listTopicArticles(long topicId, int page, int size) {
-        requireTopic(topicId);
-        int offset = (Math.max(page, 1) - 1) * size;
-        var records = dsl.selectFrom(ARTICLE)
+        var likeSum = dsl.select(org.jooq.impl.DSL.sum(ARTICLE.LIKE_COUNT))
+                .from(ARTICLE)
                 .where(ARTICLE.TOPIC_ID.eq(topicId))
                 .and(ARTICLE.STATUS.eq(ArticleStatus.PUBLISHED.code()))
-                .orderBy(ARTICLE.PUBLISHED_AT.desc())
-                .limit(size)
-                .offset(offset)
+                .fetchOne(0, java.math.BigDecimal.class);
+        int likeCount = likeSum == null ? 0 : likeSum.intValue();
+        return toDetailDto(topic, creator == null ? "未知" : creator.getNickname(), likeCount);
+    }
+
+    public TopicArticlesResponse listTopicArticles(long topicId, String sort, int page, int size) {
+        requireTopic(topicId);
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        String resolvedSort = "latest".equals(sort) ? "latest" : "hot";
+
+        var records = dsl.select(
+                        ARTICLE.ID,
+                        ARTICLE.TITLE,
+                        ARTICLE.VIEW_COUNT,
+                        ARTICLE.LIKE_COUNT,
+                        ARTICLE.COMMENT_COUNT,
+                        ARTICLE.DISLIKE_COUNT,
+                        ARTICLE.PUBLISHED_AT,
+                        USER.NICKNAME
+                )
+                .from(ARTICLE)
+                .join(USER).on(USER.ID.eq(ARTICLE.USER_ID))
+                .where(ARTICLE.TOPIC_ID.eq(topicId))
+                .and(ARTICLE.STATUS.eq(ArticleStatus.PUBLISHED.code()))
                 .fetch();
-        // Reuse TopicItemDto shape is wrong - return empty for now, articles use article list elsewhere
-        return new TopicListResponse(List.of(), records.size());
+
+        List<TopicArticleItemDto> scored = new ArrayList<>();
+        for (var record : records) {
+            int views = record.get(ARTICLE.VIEW_COUNT) == null ? 0 : record.get(ARTICLE.VIEW_COUNT);
+            int likes = record.get(ARTICLE.LIKE_COUNT) == null ? 0 : record.get(ARTICLE.LIKE_COUNT);
+            int comments = record.get(ARTICLE.COMMENT_COUNT) == null ? 0 : record.get(ARTICLE.COMMENT_COUNT);
+            int dislikes = record.get(ARTICLE.DISLIKE_COUNT) == null ? 0 : record.get(ARTICLE.DISLIKE_COUNT);
+            double hotScore = rankingService.calculateHotScore(views, likes, comments, dislikes);
+            LocalDateTime publishedAt = record.get(ARTICLE.PUBLISHED_AT);
+            scored.add(new TopicArticleItemDto(
+                    record.get(ARTICLE.ID),
+                    record.get(ARTICLE.TITLE),
+                    record.get(USER.NICKNAME),
+                    views,
+                    likes,
+                    null,
+                    publishedAt == null ? null : publishedAt.atOffset(ZoneOffset.UTC).toInstant().toString(),
+                    Math.round(hotScore * 10.0) / 10.0
+            ));
+        }
+
+        if ("latest".equals(resolvedSort)) {
+            scored.sort(Comparator.comparing(
+                    TopicArticleItemDto::published_at,
+                    Comparator.nullsLast(Comparator.reverseOrder())
+            ));
+        } else {
+            scored.sort(Comparator.comparingDouble(TopicArticleItemDto::hot_score).reversed());
+        }
+
+        int total = scored.size();
+        int from = (safePage - 1) * safeSize;
+        if (from >= total) {
+            return new TopicArticlesResponse(List.of(), total, safePage, safeSize);
+        }
+        List<TopicArticleItemDto> pageItems = scored.subList(from, Math.min(from + safeSize, total));
+        List<TopicArticleItemDto> withRank = new ArrayList<>();
+        for (int i = 0; i < pageItems.size(); i++) {
+            TopicArticleItemDto item = pageItems.get(i);
+            Integer rank = "hot".equals(resolvedSort) ? from + i + 1 : null;
+            withRank.add(new TopicArticleItemDto(
+                    item.id(),
+                    item.title(),
+                    item.author_nickname(),
+                    item.view_count(),
+                    item.like_count(),
+                    rank,
+                    item.published_at(),
+                    item.hot_score()
+            ));
+        }
+        return new TopicArticlesResponse(withRank, total, safePage, safeSize);
     }
 
     public TopicListResponse listSelectable() {
@@ -342,7 +477,7 @@ public class TopicService {
         );
     }
 
-    private TopicDetailResponse toDetailDto(TopicRecord topic, String creatorNickname) {
+    private TopicDetailResponse toDetailDto(TopicRecord topic, String creatorNickname, int likeCount) {
         TopicStatus status = TopicStatus.fromCode(topic.getStatus());
         return new TopicDetailResponse(
                 topic.getId(),
@@ -352,6 +487,7 @@ public class TopicService {
                 status.apiValue(),
                 topic.getArticleCount() == null ? 0 : topic.getArticleCount(),
                 topic.getViewCount() == null ? 0 : topic.getViewCount(),
+                likeCount,
                 topic.getDurationDays() == null ? 14 : topic.getDurationDays(),
                 topic.getRewardPoolAmount() == null ? 0 : topic.getRewardPoolAmount(),
                 formatInstant(topic.getStartAt()),

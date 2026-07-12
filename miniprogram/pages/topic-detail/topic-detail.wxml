@@ -1,1 +1,92 @@
-<view class="placeholder"><text class="title">{{title}}</text><text class="desc">话题详情页即将上线（ID: {{id}}）</text><button bindtap="goBack">返回</button></view>
+<view class="page" wx:if="{{loading}}">
+  <view class="state">加载中…</view>
+</view>
+
+<view class="page" wx:elif="{{topic}}">
+  <view class="nav-extra" bindtap="openShare">分享</view>
+
+  <view class="header">
+    <view class="badge-row">
+      <text class="badge {{statusClass}}">{{statusLabel}}</text>
+      <text class="date-hint" wx:if="{{dateHint}}">· {{dateHint}}</text>
+    </view>
+    <text class="title">{{topic.title}}</text>
+    <view class="stats">
+      <text>📝 {{articleCountText}}篇</text>
+      <text>👁 {{viewCountText}}阅读</text>
+      <text>♥ {{likeCountText}}</text>
+    </view>
+  </view>
+
+  <view class="material" wx:if="{{topic.coverUrl || topic.description}}">
+    <image
+      wx:if="{{topic.coverUrl}}"
+      class="cover"
+      src="{{topic.coverUrl}}"
+      mode="aspectFill"
+    />
+    <view wx:if="{{topic.description}}" class="desc-wrap">
+      <text class="desc {{descExpanded ? '' : 'clamp'}}">{{topic.description}}</text>
+      <view class="expand" bindtap="toggleDesc">
+        {{descExpanded ? '收起 ↑' : '展开全部 ↓'}}
+      </view>
+    </view>
+  </view>
+
+  <view class="join">
+    <button
+      wx:if="{{topic.status === 'ongoing'}}"
+      class="join-btn"
+      bindtap="goWrite"
+    >✏️ 写这个话题 →</button>
+    <view class="stats">
+      <text>📝 {{articleCountText}}篇</text>
+      <text>👁 {{viewCountText}}阅读</text>
+      <text>♥ {{likeCountText}}</text>
+    </view>
+  </view>
+
+  <view class="articles">
+    <view class="tabs">
+      <view
+        class="tab {{sort === 'hot' ? 'active' : ''}}"
+        data-sort="hot"
+        bindtap="onSortTab"
+      >热度榜</view>
+      <view
+        class="tab {{sort === 'latest' ? 'active' : ''}}"
+        data-sort="latest"
+        bindtap="onSortTab"
+      >最新</view>
+    </view>
+
+    <view
+      wx:for="{{articles}}"
+      wx:key="id"
+      class="article-row"
+      data-id="{{item.id}}"
+      bindtap="goArticle"
+    >
+      <text class="rank" wx:if="{{sort === 'hot'}}">{{item.rankLabel}}</text>
+      <view class="article-body">
+        <text class="article-title">{{item.title}}</text>
+        <text class="article-meta">{{item.authorNickname}} · {{item.viewText}}阅读 · {{item.likeText}}点赞</text>
+      </view>
+    </view>
+
+    <view wx:if="{{!articles.length}}" class="state small">暂无参与文章</view>
+    <view wx:elif="{{hasMore}}" class="more">上拉加载更多</view>
+  </view>
+
+  <view class="share-mask" wx:if="{{showShare}}" bindtap="closeShare">
+    <view class="share-panel" catchtap="">
+      <text class="share-title">分享给</text>
+      <view class="share-row">
+        <button class="share-item" open-type="share">微信好友</button>
+        <view class="share-item" bindtap="onShareMoment">朋友圈</view>
+        <view class="share-item" bindtap="onShareImage">生成图片</view>
+      </view>
+      <view class="share-cancel" bindtap="closeShare">取消</view>
+    </view>
+  </view>
+</view>

@@ -80,7 +80,7 @@ No authorization required
 
 ## featured
 
-> FeaturedArticlesResponse featured(size)
+> FeaturedArticlesResponse featured(page, size)
 
 
 
@@ -98,6 +98,8 @@ async function example() {
   const api = new ArticleControllerApi();
 
   const body = {
+    // number (optional)
+    page: 56,
     // number (optional)
     size: 56,
   } satisfies FeaturedRequest;
@@ -119,6 +121,7 @@ example().catch(console.error);
 
 | Name | Type | Description  | Notes |
 |------------- | ------------- | ------------- | -------------|
+| **page** | `number` |  | [Optional] [Defaults to `1`] |
 | **size** | `number` |  | [Optional] [Defaults to `10`] |
 
 ### Return type
