@@ -1,7 +1,9 @@
 # Ice 项目启动指南
 
 <p align="center">
-  <img src="first-record.png" alt="Ice 项目首屏" width="280"/>
+  <img src="1.png" alt="Ice 项目截图 1" width="280"/>
+  &nbsp;&nbsp;
+  <img src="2.png" alt="Ice 项目截图 2" width="280"/>
 </p>
 
 ## 项目结构
